@@ -82,3 +82,44 @@ def test_search_by_title_fuzzy(session):
     matches = tasks_repo.search_candidates(session, query="db migration", limit=2)
     titles = [t.title for t in matches]
     assert "Migrate database" in titles
+
+
+from planner.repositories import drafts_repo
+
+
+def test_create_and_get_draft(session):
+    proposed = [
+        {"op": "create", "fields": {"title": "Migrate db", "owner": "Priya"},
+         "evidence_quote": "Priya will own the Postgres migration.", "confidence": 0.9},
+    ]
+    draft = drafts_repo.create(
+        session,
+        proposed_changes=proposed,
+        summary_md="1 new task proposed.",
+    )
+    session.commit()
+
+    fetched = drafts_repo.get(session, draft.id)
+    assert fetched is not None
+    assert fetched.status == "pending"
+    assert fetched.proposed_changes[0]["op"] == "create"
+
+
+def test_list_pending_drafts(session):
+    drafts_repo.create(session, proposed_changes=[], summary_md="empty 1")
+    drafts_repo.create(session, proposed_changes=[], summary_md="empty 2")
+    session.commit()
+
+    pending = drafts_repo.list_pending(session)
+    assert len(pending) == 2
+
+
+def test_set_draft_status(session):
+    draft = drafts_repo.create(session, proposed_changes=[], summary_md="x")
+    session.commit()
+
+    drafts_repo.set_status(session, draft.id, "approved")
+    session.commit()
+
+    fetched = drafts_repo.get(session, draft.id)
+    assert fetched.status == "approved"
