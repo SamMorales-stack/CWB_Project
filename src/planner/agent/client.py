@@ -3,14 +3,11 @@ from __future__ import annotations
 
 import json
 from functools import lru_cache
-from typing import TypeVar
 
 from openai import AzureOpenAI
 from pydantic import BaseModel
 
 from planner.config import get_settings
-
-T = TypeVar("T", bound=BaseModel)
 
 
 @lru_cache(maxsize=1)
@@ -26,7 +23,7 @@ def get_client() -> AzureOpenAI:
     )
 
 
-def structured_completion(
+def structured_completion[T: BaseModel](
     *,
     deployment: str,
     system: str,
@@ -85,4 +82,5 @@ def chat_completion(*, deployment: str, system: str, user: str, temperature: flo
 def schema_to_user_hint(schema_model: type[BaseModel]) -> str:
     """Render a JSON-schema hint suitable for inclusion in a user prompt."""
     schema = schema_model.model_json_schema()
-    return f"\n\nRespond with a single JSON object matching this schema:\n{json.dumps(schema, indent=2)}"
+    schema_json = json.dumps(schema, indent=2)
+    return f"\n\nRespond with a single JSON object matching this schema:\n{schema_json}"

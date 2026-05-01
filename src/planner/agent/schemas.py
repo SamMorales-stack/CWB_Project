@@ -6,7 +6,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-
 Status = Literal["not_started", "in_progress", "blocked", "done"]
 Priority = Literal["low", "med", "high"]
 Op = Literal["create", "update", "delete"]

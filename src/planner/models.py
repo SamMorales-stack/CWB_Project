@@ -22,7 +22,9 @@ class MeetingNote(Base):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     meeting_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     attendees: Mapped[list[str]] = mapped_column(ARRAY(String), default=list)
-    ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    ingested_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
 
 
 class Task(Base):
