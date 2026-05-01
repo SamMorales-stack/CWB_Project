@@ -65,3 +65,32 @@ def test_classify_change_returns_update():
     assert result.op == "update"
     assert result.target_task_id == "00000000-0000-0000-0000-000000000001"
     assert result.fields_to_change == {"due_date": "2026-05-08"}
+
+
+from planner.agent.schemas import DraftSummary, ProposedChange  # noqa: E402, F811
+
+
+def test_generate_draft_returns_summary():
+    changes = [
+        ProposedChange(op="create", fields={"title": "Migrate db"},
+                       evidence_quote="Priya will own the Postgres migration.",
+                       confidence=0.9, reason="new task"),
+    ]
+    fake = DraftSummary(summary_md="1 new task proposed: database migration owned by Priya.")
+    with patch("planner.agent.tools.structured_completion", return_value=fake):
+        result = tools.generate_draft(changes=changes)
+    assert "1 new task" in result.summary_md
+
+
+def test_summarize_changes_returns_markdown():
+    fake = DraftSummary(summary_md="## New work\n- Migrate db (Priya)")
+    entries = [{
+        "applied_at": "2026-04-30T10:00:00Z",
+        "op": "create",
+        "task_id": "id-1",
+        "after": {"title": "Migrate db", "owner": "Priya"},
+        "evidence_quote": "Priya will own the Postgres migration.",
+    }]
+    with patch("planner.agent.tools.structured_completion", return_value=fake):
+        result = tools.summarize_changes(entries=entries)
+    assert "## New work" in result.summary_md
