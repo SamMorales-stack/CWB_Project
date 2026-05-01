@@ -30,3 +30,55 @@ def test_list_meeting_notes_returns_newest_first(session):
 
     results = notes_repo.list_recent(session, limit=10)
     assert [n.title for n in results] == ["B", "A"]
+
+
+from datetime import date as _date
+
+from planner.repositories import tasks_repo
+
+
+def test_create_and_get_task(session):
+    task = tasks_repo.create(
+        session,
+        title="Migrate database",
+        owner="Priya",
+        due_date=_date(2026, 5, 8),
+        status="in_progress",
+        priority="high",
+    )
+    session.commit()
+
+    fetched = tasks_repo.get(session, task.id)
+    assert fetched is not None
+    assert fetched.owner == "Priya"
+    assert fetched.status == "in_progress"
+
+
+def test_update_task_fields(session):
+    task = tasks_repo.create(session, title="Migrate database", owner="Priya")
+    session.commit()
+
+    tasks_repo.update(session, task.id, fields={"owner": "Marco", "status": "blocked"})
+    session.commit()
+
+    fetched = tasks_repo.get(session, task.id)
+    assert fetched.owner == "Marco"
+    assert fetched.status == "blocked"
+
+
+def test_list_all_tasks(session):
+    tasks_repo.create(session, title="A")
+    tasks_repo.create(session, title="B")
+    session.commit()
+
+    assert {t.title for t in tasks_repo.list_all(session)} == {"A", "B"}
+
+
+def test_search_by_title_fuzzy(session):
+    tasks_repo.create(session, title="Migrate database")
+    tasks_repo.create(session, title="Update dashboard skeleton")
+    session.commit()
+
+    matches = tasks_repo.search_candidates(session, query="db migration", limit=2)
+    titles = [t.title for t in matches]
+    assert "Migrate database" in titles
