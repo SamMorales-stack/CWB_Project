@@ -4,7 +4,14 @@ from __future__ import annotations
 from unittest.mock import patch
 
 from planner.agent import tools
-from planner.agent.schemas import ExtractionResult
+from planner.agent.schemas import (
+    CandidateMatch,
+    ClassificationResult,
+    DraftSummary,
+    ExtractedItem,
+    ExtractionResult,
+    ProposedChange,
+)
 
 
 def test_extract_tasks_parses_items():
@@ -35,9 +42,6 @@ def test_extract_tasks_parses_items():
     m.assert_called_once()
 
 
-from planner.agent.schemas import CandidateMatch, ClassificationResult, ExtractedItem  # noqa: E402, F811
-
-
 def test_classify_change_returns_update():
     item = ExtractedItem(
         title="Postgres migration",
@@ -65,9 +69,6 @@ def test_classify_change_returns_update():
     assert result.op == "update"
     assert result.target_task_id == "00000000-0000-0000-0000-000000000001"
     assert result.fields_to_change == {"due_date": "2026-05-08"}
-
-
-from planner.agent.schemas import DraftSummary, ProposedChange  # noqa: E402, F811
 
 
 def test_generate_draft_returns_summary():

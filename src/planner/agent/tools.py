@@ -5,14 +5,22 @@ import json
 
 from planner.agent.client import schema_to_user_hint, structured_completion
 from planner.agent.prompts import (
-    CLASSIFY_SYSTEM, CLASSIFY_USER_TEMPLATE,
-    DIGEST_SYSTEM, DIGEST_USER_TEMPLATE,
-    DRAFT_SYSTEM, DRAFT_USER_TEMPLATE,
-    EXTRACT_SYSTEM, EXTRACT_USER_TEMPLATE,
+    CLASSIFY_SYSTEM,
+    CLASSIFY_USER_TEMPLATE,
+    DIGEST_SYSTEM,
+    DIGEST_USER_TEMPLATE,
+    DRAFT_SYSTEM,
+    DRAFT_USER_TEMPLATE,
+    EXTRACT_SYSTEM,
+    EXTRACT_USER_TEMPLATE,
 )
 from planner.agent.schemas import (
-    CandidateMatch, ClassificationResult, DraftSummary,
-    ExtractedItem, ExtractionResult, ProposedChange,
+    CandidateMatch,
+    ClassificationResult,
+    DraftSummary,
+    ExtractedItem,
+    ExtractionResult,
+    ProposedChange,
 )
 from planner.config import get_settings
 
@@ -57,7 +65,10 @@ def generate_draft(*, changes: list[ProposedChange]) -> DraftSummary:
     """Compose an executive-friendly summary of the proposed changes."""
     s = get_settings()
     payload = [c.model_dump(mode="json") for c in changes]
-    user = DRAFT_USER_TEMPLATE.format(changes_json=json.dumps(payload, indent=2)) + schema_to_user_hint(DraftSummary)
+    user = (
+        DRAFT_USER_TEMPLATE.format(changes_json=json.dumps(payload, indent=2))
+        + schema_to_user_hint(DraftSummary)
+    )
     return structured_completion(
         deployment=s.azure_openai_deployment_main,
         system=DRAFT_SYSTEM,
@@ -70,7 +81,10 @@ def generate_draft(*, changes: list[ProposedChange]) -> DraftSummary:
 def summarize_changes(*, entries: list[dict]) -> DraftSummary:
     """Compose a weekly executive digest from change_log entries."""
     s = get_settings()
-    user = DIGEST_USER_TEMPLATE.format(entries_json=json.dumps(entries, indent=2, default=str)) + schema_to_user_hint(DraftSummary)
+    user = (
+        DIGEST_USER_TEMPLATE.format(entries_json=json.dumps(entries, indent=2, default=str))
+        + schema_to_user_hint(DraftSummary)
+    )
     return structured_completion(
         deployment=s.azure_openai_deployment_main,
         system=DIGEST_SYSTEM,
