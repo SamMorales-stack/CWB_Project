@@ -1,8 +1,10 @@
 """Repository-layer tests."""
 from __future__ import annotations
 
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
+from datetime import date as _date
 
+from planner.repositories import change_log_repo, drafts_repo, tasks_repo
 from planner.repositories import meeting_notes_repo as notes_repo
 
 
@@ -30,11 +32,6 @@ def test_list_meeting_notes_returns_newest_first(session):
 
     results = notes_repo.list_recent(session, limit=10)
     assert [n.title for n in results] == ["B", "A"]
-
-
-from datetime import date as _date
-
-from planner.repositories import tasks_repo
 
 
 def test_create_and_get_task(session):
@@ -84,9 +81,6 @@ def test_search_by_title_fuzzy(session):
     assert "Migrate database" in titles
 
 
-from planner.repositories import drafts_repo
-
-
 def test_create_and_get_draft(session):
     proposed = [
         {"op": "create", "fields": {"title": "Migrate db", "owner": "Priya"},
@@ -123,3 +117,42 @@ def test_set_draft_status(session):
 
     fetched = drafts_repo.get(session, draft.id)
     assert fetched.status == "approved"
+
+
+def test_record_and_list_change_log(session):
+    task = tasks_repo.create(session, title="X", owner="Priya")
+    draft = drafts_repo.create(session, proposed_changes=[], summary_md="x")
+    session.commit()
+
+    change_log_repo.record(
+        session,
+        draft_id=draft.id,
+        task_id=task.id,
+        op="update",
+        before={"owner": "Priya"},
+        after={"owner": "Marco"},
+        evidence_quote="Marco picks up the new dashboard skeleton.",
+        approved_by="reviewer",
+    )
+    session.commit()
+
+    entries = change_log_repo.list_recent(session, limit=10)
+    assert len(entries) == 1
+    assert entries[0].op == "update"
+    assert entries[0].after == {"owner": "Marco"}
+
+
+def test_list_within_window(session):
+    task = tasks_repo.create(session, title="X")
+    draft = drafts_repo.create(session, proposed_changes=[], summary_md="x")
+    session.commit()
+
+    change_log_repo.record(
+        session, draft_id=draft.id, task_id=task.id, op="create",
+        before=None, after={"title": "X"}, evidence_quote="...", approved_by="reviewer",
+    )
+    session.commit()
+
+    window_start = datetime.now(UTC) - timedelta(days=7)
+    entries = change_log_repo.list_since(session, since=window_start)
+    assert len(entries) == 1

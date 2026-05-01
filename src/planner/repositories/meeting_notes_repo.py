@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -25,7 +25,7 @@ def create(
         content=content,
         meeting_date=meeting_date,
         attendees=attendees or [],
-        ingested_at=datetime.now(timezone.utc),
+        ingested_at=datetime.now(UTC),
     )
     session.add(note)
     session.flush()

@@ -10,7 +10,6 @@ from sqlalchemy.orm import Session
 
 from planner.models import Task
 
-
 _ALLOWED_FIELDS = {
     "title", "description", "owner", "due_date",
     "status", "priority", "depends_on",
