@@ -30,7 +30,9 @@ def render() -> None:
         ]
 
     if not rows:
-        st.info("No tasks yet. Process a note in the Inbox and approve a draft to populate the plan.")
+        st.info(
+            "No tasks yet. Process a note in the Inbox and approve a draft to populate the plan."
+        )
         return
 
     df = pd.DataFrame(rows)

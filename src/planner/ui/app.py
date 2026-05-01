@@ -10,6 +10,7 @@ def _check_health() -> dict[str, bool]:
     health = {"postgres": False, "azure_openai": False}
     try:
         from sqlalchemy import text
+
         from planner.db import SessionLocal
         with SessionLocal() as s:
             s.execute(text("select 1"))

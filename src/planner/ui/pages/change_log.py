@@ -1,8 +1,6 @@
 """Change Log page: audit trail with diff view and weekly digest."""
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
-
 import pandas as pd
 import streamlit as st
 
