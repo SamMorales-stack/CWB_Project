@@ -85,8 +85,8 @@ ICONS = {
 }
 
 APP_NAME = "PlanForge"
-APP_TAGLINE = "by SJ"
-APP_PAGE_TITLE = "PlanForge by SJ"
+APP_TAGLINE = "SJ Group"
+APP_PAGE_TITLE = "PlanForge — SJ Group"
 
 
 # ── SJ Logo ────────────────────────────────────────────────────────────────
