@@ -34,11 +34,14 @@ az acr create \
     --sku Basic --admin-enabled true \
     --output none
 
-echo "==> Build and push image via ACR"
-az acr build \
-    --registry "$ACR" \
-    --image "sjplanner:${IMAGE_TAG}" \
-    .
+echo "==> Build image locally and push to ACR"
+ACR_LOGIN_SERVER="$(az acr show --name "$ACR" --query loginServer -o tsv)"
+ACR_USERNAME="$(az acr credential show --name "$ACR" --query username -o tsv)"
+ACR_PASSWORD="$(az acr credential show --name "$ACR" --query 'passwords[0].value' -o tsv)"
+
+echo "$ACR_PASSWORD" | docker login "$ACR_LOGIN_SERVER" -u "$ACR_USERNAME" --password-stdin
+docker build -t "${ACR_LOGIN_SERVER}/sjplanner:${IMAGE_TAG}" .
+docker push "${ACR_LOGIN_SERVER}/sjplanner:${IMAGE_TAG}"
 
 echo "==> Postgres Flexible Server (Burstable B1ms)"
 az postgres flexible-server create \
