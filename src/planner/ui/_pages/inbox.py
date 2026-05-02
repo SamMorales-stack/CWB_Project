@@ -15,9 +15,9 @@ def render() -> None:
         f"""
         <div style="margin-bottom:4px;">
             <div style="font-size:28px;font-weight:800;color:{COLORS['text']};letter-spacing:-0.02em;">
-                {ICONS['inbox']} Inbox
+                Inbox
             </div>
-            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;max-width:640px;">
+            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;">
                 Paste a meeting note or upload a file. The agent extracts tasks,
                 compares them to the current plan, and prepares a draft for review.
             </div>

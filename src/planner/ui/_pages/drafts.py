@@ -26,9 +26,9 @@ def render() -> None:
         f"""
         <div style="margin-bottom:4px;">
             <div style="font-size:28px;font-weight:800;color:{COLORS['text']};letter-spacing:-0.02em;">
-                {ICONS['drafts']} Drafts
+                Drafts
             </div>
-            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;max-width:640px;">
+            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;">
                 High-confidence changes are pre-checked for approval.
                 Low-confidence changes are flagged and require an explicit click.
             </div>

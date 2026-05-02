@@ -5,6 +5,7 @@ import streamlit as st
 
 from planner.db import session_scope
 from planner.repositories import change_log_repo, meeting_notes_repo, tasks_repo
+from planner.ui.styles import COLORS, empty_state, section_header
 
 
 def _format_diff(before: dict | None, after: dict | None) -> str:
@@ -21,10 +22,20 @@ def _format_diff(before: dict | None, after: dict | None) -> str:
 
 
 def render() -> None:
-    st.title("Replay")
-    st.caption(
-        "Step through meeting notes in chronological order and see the changes "
-        "each one contributed to the plan."
+    # Header
+    st.markdown(
+        f"""
+        <div style="margin-bottom:4px;">
+            <div style="font-size:28px;font-weight:800;color:{COLORS['text']};letter-spacing:-0.02em;">
+                Replay
+            </div>
+            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;">
+                Step through meeting notes in chronological order and see the changes
+                each one contributed to the plan.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     with session_scope() as s:
@@ -43,8 +54,10 @@ def render() -> None:
         total_tasks = len(tasks_repo.list_all(s))
 
     if not note_data:
-        st.info(
-            "No meeting notes loaded yet. Click **Load sample dataset** in the sidebar first."
+        empty_state(
+            icon="🔄",
+            title="No meeting notes loaded yet",
+            subtitle="Click Load sample dataset in the sidebar first.",
         )
         return
 

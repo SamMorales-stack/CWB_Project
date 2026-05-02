@@ -18,9 +18,9 @@ def render() -> None:
         f"""
         <div style="margin-bottom:4px;">
             <div style="font-size:28px;font-weight:800;color:{COLORS['text']};letter-spacing:-0.02em;">
-                {ICONS['gantt']} Gantt
+                Gantt
             </div>
-            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;max-width:640px;">
+            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;">
                 Visual timeline. Bars span from task creation to due date.
             </div>
         </div>
@@ -135,4 +135,4 @@ def render() -> None:
         ),
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, height=520)

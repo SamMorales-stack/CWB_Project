@@ -21,9 +21,9 @@ def render() -> None:
         f"""
         <div style="margin-bottom:4px;">
             <div style="font-size:28px;font-weight:800;color:{COLORS['text']};letter-spacing:-0.02em;">
-                {ICONS['changelog']} Change Log
+                Change Log
             </div>
-            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;max-width:640px;">
+            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;">
                 Every applied change with before/after snapshots and source evidence.
             </div>
         </div>
