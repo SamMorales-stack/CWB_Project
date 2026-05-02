@@ -9,19 +9,18 @@ import streamlit as st
 
 from planner.db import session_scope
 from planner.repositories import tasks_repo
-from planner.ui.styles import COLORS, ICONS, empty_state
+from planner.ui.styles import COLORS, empty_state
 
 
 def render() -> None:
-    # Header
     st.markdown(
         f"""
-        <div style="margin-bottom:4px;">
+        <div style="margin-bottom:16px;">
             <div style="font-size:28px;font-weight:800;color:{COLORS['text']};letter-spacing:-0.02em;">
                 Gantt
             </div>
             <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;">
-                Visual timeline. Bars span from task creation to due date.
+                Visual timeline coloured by status. One row per unique task title.
             </div>
         </div>
         """,
@@ -37,6 +36,7 @@ def render() -> None:
                 "start": t.created_at.date() if t.created_at else None,
                 "finish": t.due_date,
                 "status": t.status,
+                "priority": t.priority,
             }
             for t in tasks
         ]
@@ -50,6 +50,14 @@ def render() -> None:
         )
         return
 
+    # Deduplicate: one row per title (keep latest finish date per title/status pair)
+    seen: dict[str, dict] = {}
+    for r in plottable:
+        key = r["title"]
+        if key not in seen or r["finish"] > seen[key]["finish"]:
+            seen[key] = r
+    plottable = list(seen.values())
+
     for r in plottable:
         if r["start"] is None or r["start"] >= r["finish"]:
             r["start"] = r["finish"] - pd.Timedelta(days=7)
@@ -58,31 +66,65 @@ def render() -> None:
     df["Start"] = pd.to_datetime(df["start"])
     df["Finish"] = pd.to_datetime(df["finish"])
 
+    # ── Filters ───────────────────────────────────────────────────────────────
+    f1, f2, f3 = st.columns([2, 2, 1])
+    status_opts = sorted(df["status"].unique())
+    owner_opts  = sorted(o for o in df["owner"].unique() if o and o != "—")
+
+    status_filter = f1.multiselect("Status", status_opts, default=status_opts,
+                                   label_visibility="collapsed",
+                                   placeholder="Filter by status…")
+    owner_filter  = f2.multiselect("Owner", owner_opts,
+                                   label_visibility="collapsed",
+                                   placeholder="Filter by owner…")
+    hide_done     = f3.checkbox("Hide done", value=False)
+
+    filtered = df.copy()
+    if status_filter:
+        filtered = filtered[filtered["status"].isin(status_filter)]
+    if owner_filter:
+        filtered = filtered[filtered["owner"].isin(owner_filter)]
+    if hide_done:
+        filtered = filtered[filtered["status"] != "done"]
+
+    if filtered.empty:
+        st.info("No tasks match the current filters.")
+        return
+
+    # Sort by finish date so earliest deadlines appear at top
+    filtered = filtered.sort_values("Finish")
+
+    n_rows = len(filtered)
+    # 30px per row, min 400, max 1400
+    chart_height = max(400, min(1400, n_rows * 30 + 120))
+
     fig = px.timeline(
-        df,
+        filtered,
         x_start="Start",
         x_end="Finish",
         y="title",
         color="status",
-        hover_data=["owner"],
+        hover_data=["owner", "priority"],
         color_discrete_map={
             "not_started": "#64748B",
             "in_progress": "#2563EB",
-            "blocked": "#F87171",
-            "done": "#2DD4BF",
+            "blocked":     "#F87171",
+            "done":        "#2DD4BF",
         },
-        labels={"title": "Task", "status": "Status"},
+        labels={"title": "", "status": "Status"},
         template="plotly_dark",
     )
 
-    fig.update_yaxes(autorange="reversed")
+    fig.update_yaxes(autorange="reversed", tickfont=dict(size=12))
     fig.update_layout(
+        height=chart_height,
         paper_bgcolor=COLORS["bg"],
         plot_bgcolor=COLORS["surface"],
         font_color=COLORS["text"],
         font_family="Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
         font_size=13,
-        margin=dict(l=200, r=40, t=40, b=60),
+        bargap=0.25,
+        margin=dict(l=220, r=40, t=50, b=50),
         legend=dict(
             orientation="h",
             yanchor="bottom",
@@ -100,14 +142,11 @@ def render() -> None:
             tickfont=dict(size=11),
         ),
         yaxis=dict(
-            gridcolor=COLORS["border"],
+            gridcolor="rgba(0,0,0,0)",
             linecolor=COLORS["border"],
-            tickfont=dict(size=11),
         ),
     )
 
-    # Today's line — add_vline annotation causes pandas 3.x TypeError,
-    # so use add_shape + add_annotation directly.
     today_str = date.today().isoformat()
     fig.add_shape(
         type="line",
@@ -122,17 +161,18 @@ def render() -> None:
         xanchor="left",
     )
 
-    # Bars styling
     fig.update_traces(
         marker_line_width=0,
-        opacity=0.92,
+        opacity=0.90,
         hovertemplate=(
             "<b>%{y}</b><br>"
             "Owner: %{customdata[0]}<br>"
-            "Start: %{x_start|%b %d, %Y}<br>"
-            "End: %{x_end|%b %d, %Y}<br>"
+            "Priority: %{customdata[1]}<br>"
+            "Start: %{base|%b %d, %Y}<br>"
+            "Due: %{x|%b %d, %Y}<br>"
             "<extra></extra>"
         ),
     )
 
-    st.plotly_chart(fig, use_container_width=True, height=520)
+    st.caption(f"Showing {n_rows} tasks — use filters above to narrow the view")
+    st.plotly_chart(fig, use_container_width=True)
