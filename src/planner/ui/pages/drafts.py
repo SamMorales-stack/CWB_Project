@@ -137,9 +137,12 @@ def render() -> None:
 def _render_conflict_resolution(
     *, draft_id: uuid.UUID, change_index: int, change: dict,
 ) -> None:
-    """Side-by-side view for conflict resolution: Merge or Keep Separate."""
+    """Side-by-side table for conflict resolution: Merge or Keep Separate."""
     cand_ids = change.get("candidate_task_ids") or []
-    st.error(f"⚠️ Conflict — {len(cand_ids)} possible existing task(s). Resolve below.")
+    st.error(
+        f"⚠️ Conflict — {len(cand_ids)} possible existing task(s). "
+        "Pick the right one below, or create a new task."
+    )
 
     with session_scope() as s:
         candidates = []
@@ -148,28 +151,63 @@ def _render_conflict_resolution(
                 t = tasks_repo.get(s, uuid.UUID(cid))
                 if t is not None:
                     candidates.append({
-                        "id": str(t.id), "title": t.title, "owner": t.owner,
-                        "due_date": t.due_date.isoformat() if t.due_date else None,
+                        "id": str(t.id), "title": t.title, "owner": t.owner or "—",
+                        "due_date": t.due_date.isoformat() if t.due_date else "—",
                         "status": t.status,
                     })
             except Exception:
                 pass
 
-    # Simpler column layout
-    all_cols = st.columns(max(len(candidates) + 1, 2))
-    with all_cols[0]:
-        st.markdown("**Agent proposes:**")
-        st.json(change.get("fields") or {}, expanded=True)
+    fields = change.get("fields") or {}
 
-    for j, cand in enumerate(candidates):
-        if j + 1 < len(all_cols):
-            with all_cols[j + 1]:
-                st.markdown(f"**Candidate #{j + 1}:**")
-                st.json(cand, expanded=True)
-                if st.button(
-                    f"Merge into #{j + 1}",
-                    key=f"merge_{draft_id}_{change_index}_{j}",
-                ):
+    # Render as a clean comparison table
+    st.markdown("**Proposed change vs. existing candidates:**")
+
+    _card = lambda label, title, owner, due, status, bg="#1e1e2e": (  # noqa: E731
+        f'<div style="background:{bg};border-radius:8px;padding:10px 14px;margin:4px 0">'
+        f'<div style="font-size:11px;color:#aaa;margin-bottom:4px">{label}</div>'
+        f'<div style="font-weight:600;font-size:14px;margin-bottom:6px">{title}</div>'
+        f'<div style="font-size:12px;color:#ccc">👤 {owner}</div>'
+        f'<div style="font-size:12px;color:#ccc">📅 {due}</div>'
+        f'<div style="font-size:12px;color:#ccc">🔖 {status}</div>'
+        f'</div>'
+    )
+
+    # Agent proposal card (full width)
+    st.markdown(
+        _card(
+            "🤖 Agent proposes",
+            fields.get("title", "—"),
+            fields.get("owner", "—"),
+            fields.get("due_date", "—"),
+            fields.get("status", "—"),
+            bg="#1a2a1a",
+        ),
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("**Which existing task does this refer to?**")
+
+    # Candidates in rows of up to 4
+    chunk_size = 4
+    for chunk_start in range(0, len(candidates), chunk_size):
+        chunk = candidates[chunk_start:chunk_start + chunk_size]
+        cols = st.columns(len(chunk))
+        for k, (col, cand) in enumerate(zip(cols, chunk, strict=False)):
+            j = chunk_start + k
+            with col:
+                st.markdown(
+                    _card(
+                        f"Candidate #{j + 1}",
+                        cand["title"],
+                        cand["owner"],
+                        cand["due_date"],
+                        cand["status"],
+                    ),
+                    unsafe_allow_html=True,
+                )
+                if st.button(f"Merge →#{j + 1}", key=f"merge_{draft_id}_{change_index}_{j}",
+                             use_container_width=True):
                     _rewrite_change(
                         draft_id=draft_id, change_index=change_index,
                         new_op="update", target_task_id=cand["id"],
@@ -177,7 +215,7 @@ def _render_conflict_resolution(
                     st.rerun()
 
     if st.button(
-        "Keep Separate (create new task)",
+        "➕ Keep Separate (create a new task)",
         key=f"keep_sep_{draft_id}_{change_index}",
     ):
         _rewrite_change(
