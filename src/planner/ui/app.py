@@ -1,14 +1,17 @@
-"""Streamlit entry point for the SJ Project Planner Agent."""
+"""Streamlit entry point for PlanForge by SJ."""
 from __future__ import annotations
 
 import streamlit as st
 
 from planner.config import get_settings
 from planner.ui.styles import (
+    APP_NAME,
+    APP_TAGLINE,
     COLORS,
     ICONS,
     connection_pill,
     inject_global_css,
+    sj_logo_html,
 )
 
 
@@ -52,29 +55,31 @@ def _sidebar_stats() -> tuple[int, str]:
 
 def main() -> None:
     st.set_page_config(
-        page_title="SJ Project Planner",
+        page_title="PlanForge",
         layout="wide",
         page_icon="📋",
         initial_sidebar_state="expanded",
     )
 
     inject_global_css()
-    settings = get_settings()
+    _ = get_settings()
 
     # ── Sidebar ──────────────────────────────────────────────────────────────
     with st.sidebar:
-        # Project branding card
+        # SJ Logo + PlanForge branding
         st.markdown(
             f"""
             <div style="background:{COLORS['surface']};border:1px solid {COLORS['border']};
             border-radius:12px;padding:16px;margin-bottom:8px;">
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                    <span style="font-size:26px;">📋</span>
-                    <span style="font-weight:800;font-size:16px;color:{COLORS['text']};
-                    letter-spacing:-0.02em;">{settings.app_name}</span>
-                </div>
-                <div style="font-size:12px;color:{COLORS['text_muted']};">
-                    Microsoft CWB Hackathon 2026
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                    {sj_logo_html(38)}
+                    <div>
+                        <div style="font-weight:800;font-size:16px;color:{COLORS['text']};
+                        letter-spacing:-0.02em;">{APP_NAME}</div>
+                        <div style="font-size:10px;color:{COLORS['text_muted']};
+                        font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
+                        margin-top:-2px;">{APP_TAGLINE}</div>
+                    </div>
                 </div>
             </div>
             """,
@@ -88,14 +93,14 @@ def main() -> None:
                 <div style="flex:1;background:{COLORS['surface']};border:1px solid {COLORS['border']};
                 border-radius:8px;padding:10px;text-align:center;">
                     <div style="font-size:20px;font-weight:800;color:{COLORS['primary']};">{total_tasks}</div>
-                    <div style="font-size:10px;font-weight:600;color:{COLORS['text_muted']};
+                    <div style="font-size:10px;font-weight:700;color:{COLORS['text_muted']};
                     text-transform:uppercase;letter-spacing:0.05em;">Tasks</div>
                 </div>
                 <div style="flex:1;background:{COLORS['surface']};border:1px solid {COLORS['border']};
                 border-radius:8px;padding:10px;text-align:center;">
                     <div style="font-size:11px;font-weight:600;color:{COLORS['text_secondary']};
                     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{last_change}</div>
-                    <div style="font-size:10px;font-weight:600;color:{COLORS['text_muted']};
+                    <div style="font-size:10px;font-weight:700;color:{COLORS['text_muted']};
                     text-transform:uppercase;letter-spacing:0.05em;">Last Change</div>
                 </div>
             </div>

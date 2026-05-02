@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanForge — UI Design Review</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #0B0F19;
+    --surface: #111827;
+    --surface-hi: #1F2937;
+    --border: #374151;
+    --primary: #2563EB;
+    --primary-hover: #1D4ED8;
+    --primary-light: #3B82F6;
+    --success: #2DD4BF;
+    --warning: #FBBF24;
+    --error: #F87171;
+    --not-started: #64748B;
+    --text: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --text-muted: #6B7280;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding-bottom: 80px;
+    scroll-behavior: smooth;
+  }
+
+  /* ===== TOP NAV ===== */
+  .top-nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(11,15,25,0.94);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 32px;
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+  }
+  .top-nav .brand-nav {
+    display: flex; align-items: center; gap: 10px;
+    margin-right: 20px;
+  }
+  .nav-link {
+    color: var(--text-secondary); text-decoration: none;
+    font-size: 12px; font-weight: 600;
+    padding: 5px 10px; border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface); }
+  .nav-link.active { color: var(--primary); background: var(--surface); }
+
+  /* ===== SECTIONS ===== */
+  section {
+    padding: 48px 32px; max-width: 1180px; margin: 0 auto;
+  }
+  .section-title {
+    font-size: 26px; font-weight: 800;
+    letter-spacing: -0.02em; margin-bottom: 6px;
+  }
+  .section-sub {
+    color: var(--text-muted); font-size: 14px;
+    margin-bottom: 28px; max-width: 600px;
+  }
+
+  /* ===== LOGO ===== */
+  .sj-logo {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; flex-shrink: 0;
+  }
+  .sj-logo-text {
+    color: #fff; font-size: 16px; font-weight: 800;
+    letter-spacing: -0.02em; line-height: 1;
+  }
+  .sj-logo-dot {
+    position: absolute;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #EF4444;
+    top: 6px; right: 7px;
+    box-shadow: 0 0 0 2px rgba(239,68,68,0.25);
+  }
+
+  /* ===== MOCK APP CONTAINER ===== */
+  .mock-app {
+    display: flex;
+    height: 580px;
+    border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden;
+    background: var(--bg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  .mock-sidebar {
+    width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 14px; display: flex; flex-direction: column; gap: 2px;
+    flex-shrink: 0;
+  }
+  .mock-main {
+    flex: 1; padding: 24px; overflow-y: auto;
+  }
+
+  /* Brand block */
+  .brand-block {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 4px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .brand-name {
+    font-weight: 800; font-size: 14px;
+    letter-spacing: -0.02em;
+  }
+  .brand-tag {
+    font-size: 9px; color: var(--text-muted);
+    font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.06em; margin-top: -2px;
+  }
+
+  /* Stats */
+  .sidebar-stats {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .stat-box {
+    flex: 1; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px; text-align: center;
+  }
+  .stat-box .sv { font-size: 16px; font-weight: 800; color: var(--primary); }
+  .stat-box .sl { font-size: 9px; color: var(--text-muted); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+
+  /* Nav */
+  .nav-label { font-size: 10px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em; margin: 12px 4px 6px; }
+  .nav-item { padding: 7px 10px; border-radius: 8px; font-size: 13px;
+    color: var(--text-secondary); font-weight: 500; cursor: pointer;
+    transition: all 0.12s; display: flex; align-items: center; gap: 8px; }
+  .nav-item:hover { background: var(--surface-hi); color: var(--text); }
+  .nav-item.active {
+    background: var(--surface-hi); color: var(--primary);
+    font-weight: 600; border-left: 3px solid var(--primary); }
+  .nav-icon-svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .nav-icon-svg .si { stroke: currentColor; fill: none; stroke-width: 1.8;
+    stroke-linecap: round; stroke-linejoin: round; }
+
+  /* Conn pills */
+  .conn-row { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border);
+    display: flex; gap: 6px; flex-wrap: wrap; }
+  .conn-pill { font-size: 10px; font-weight: 700; padding: 3px 8px;
+    border-radius: 6px; display: flex; align-items: center; gap: 4px; }
+  .conn-ok { color: var(--success); background: rgba(45,212,191,0.12); }
+
+  /* ===== PAGE HEADER ===== */
+  .page-header { margin-bottom: 20px; }
+  .page-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text-muted); }
+
+  /* ===== CARDS ===== */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px; margin-bottom: 14px;
+  }
+  .card-head { font-size: 11px; font-weight: 700; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+  /* ===== METRICS ===== */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .metric {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px;
+  }
+  .metric-lab { font-size: 10px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .metric-val { font-size: 28px; font-weight: 800; line-height: 1; }
+
+  /* ===== FORM ===== */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .fg label { display: block; font-size: 11px; font-weight: 700;
+    color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .fg input, .fg select, .fg textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; color: var(--text);
+    font-size: 13px; font-family: inherit; transition: border 0.15s;
+  }
+  .fg input:focus, .fg select:focus, .fg textarea:focus {
+    outline: none; border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 6px; padding: 10px 18px; border-radius: 8px;
+    font-size: 13px; font-weight: 700; border: none;
+    cursor: pointer; transition: all 0.15s; font-family: inherit;
+  }
+  .btn-pri {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: #fff; box-shadow: 0 2px 8px rgba(37,99,235,0.30);
+  }
+  .btn-pri:hover {
+    box-shadow: 0 4px 16px rgba(37,99,235,0.45);
+    transform: translateY(-1px);
+  }
+  .btn-sec {
+    background: var(--surface-hi); border: 1px solid var(--border);
+    color: var(--text-secondary);
+  }
+  .btn-sec:hover { border-color: var(--primary); color: var(--text); }
+
+  /* ===== BADGES ===== */
+  .badge { display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    border: 1px solid transparent; }
+  .b-ns { background: rgba(100,116,139,0.12); color: #64748B; border-color: rgba(100,116,139,0.25); }
+  .b-ip { background: rgba(37,99,235,0.12); color: #2563EB; border-color: rgba(37,99,235,0.25); }
+  .b-bl { background: rgba(248,113,113,0.12); color: #F87171; border-color: rgba(248,113,113,0.25); }
+  .b-dn { background: rgba(45,212,191,0.12); color: #2DD4BF; border-color: rgba(45,212,191,0.25); }
+  .b-cr { background: rgba(45,212,191,0.12); color: #2DD4BF; border-color: rgba(45,212,191,0.25); }
+  .b-up { background: rgba(37,99,235,0.12); color: #2563EB; border-color: rgba(37,99,235,0.25); }
+  .b-cf { background: rgba(251,191,36,0.12); color: #FBBF24; border-color: rgba(251,191,36,0.25); }
+  .b-de { background: rgba(248,113,113,0.12); color: #F87171; border-color: rgba(248,113,113,0.25); }
+  .b-hi { background: rgba(45,212,191,0.12); color: #2DD4BF; border-color: rgba(45,212,191,0.25); }
+  .b-md { background: rgba(251,191,36,0.12); color: #FBBF24; border-color: rgba(251,191,36,0.25); }
+  .b-lo { background: rgba(248,113,113,0.12); color: #F87171; border-color: rgba(248,113,113,0.25); }
+
+  /* ===== TABLES ===== */
+  .table-wrap { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .th, .tr { display: grid; grid-template-columns: 2fr 1fr 0.8fr 1fr 0.8fr; gap: 12px;
+    padding: 10px 16px; align-items: center; }
+  .th { background: var(--surface); font-size: 11px; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700;
+    border-bottom: 1px solid var(--border); }
+  .tr { font-size: 13px; border-bottom: 1px solid rgba(55,65,81,0.4); transition: background 0.1s; }
+  .tr:last-child { border-bottom: none; }
+  .tr:hover { background: var(--surface); }
+  .tr-over { background: rgba(248,113,113,0.06) !important; }
+  .tr-soon { background: rgba(251,191,36,0.04) !important; }
+  .tr-done { opacity: 0.45; }
+  .c-task { font-weight: 500; }
+  .c-own, .c-date { color: var(--text-secondary); }
+
+  /* ===== CHANGE CARDS ===== */
+  .change-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px; margin-bottom: 10px;
+  }
+  .change-card.conflict { border-color: rgba(251,191,36,0.4); }
+  .ch-hdr { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .ch-title { font-size: 13px; font-weight: 600; }
+  .quote-box {
+    background: var(--bg); border-left: 3px solid var(--primary-light);
+    border-radius: 0 8px 8px 0; padding: 10px 14px;
+    margin-top: 10px; font-size: 12px; color: var(--text-secondary);
+    font-style: italic;
+  }
+  .reason-box {
+    background: var(--bg); border-left: 3px solid var(--primary);
+    border-radius: 0 8px 8px 0; padding: 10px 14px;
+    margin-top: 10px; font-size: 12px; color: var(--text);
+  }
+  .ch-acts { display: flex; gap: 12px; margin-top: 10px; }
+  .ch-acts label { display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--text-secondary); cursor: pointer; }
+  .ch-acts input[type="checkbox"] { accent-color: var(--primary); }
+  .cand-card {
+    background: var(--surface-hi); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; margin-top: 8px;
+  }
+  .cand-card.prop {
+    background: rgba(45,212,191,0.04); border-color: rgba(45,212,191,0.25);
+  }
+
+  /* ===== TIMELINE ===== */
+  .tl { display: flex; gap: 14px; margin-bottom: 12px; }
+  .tl-dot { display: flex; flex-direction: column; align-items: center; }
+  .tl-dot .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    box-shadow: 0 0 0 4px;
+  }
+  .tl-dot .line { width: 2px; flex: 1; background: var(--border); min-height: 20px; }
+  .tl-body { flex: 1; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .tl-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .tl-time { font-size: 11px; font-weight: 700; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: 0.05em; }
+  .tl-diff { font-size: 13px; color: var(--text); margin-bottom: 6px; }
+  .tl-evid { font-size: 12px; color: var(--text-secondary); font-style: italic; margin-bottom: 4px; }
+  .tl-apr { font-size: 11px; color: var(--text-muted); }
+
+  /* ===== GANTT ===== */
+  .g-area {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px; height: 320px; position: relative; overflow: hidden;
+  }
+  .g-bar {
+    height: 28px; border-radius: 6px; margin-bottom: 10px;
+    display: flex; align-items: center; padding: 0 12px;
+    font-size: 12px; font-weight: 600; color: #fff; position: relative;
+  }
+  .g-label {
+    position: absolute; left: -180px; width: 170px; text-align: right;
+    color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  }
+  .g-today {
+    position: absolute; top: 0; bottom: 0; width: 2px;
+    background: var(--warning); border-left: 2px dashed var(--warning);
+  }
+  .g-today-lbl {
+    position: absolute; top: 4px; font-size: 10px; color: var(--warning);
+    font-weight: 700; text-transform: uppercase;
+  }
+
+  /* ===== FILTERS ===== */
+  .filters {
+    display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px; margin-bottom: 16px;
+  }
+
+  /* ===== COLORS ===== */
+  .cgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; margin: 14px 0; }
+  .swatch { height: 60px; border-radius: 10px; display: flex; flex-direction: column;
+    justify-content: flex-end; padding: 8px 10px; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid rgba(255,255,255,0.06); }
+
+  .scroll-hint { text-align: center; color: var(--text-muted); font-size: 12px; margin-top: 8px; }
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  @media (max-width: 900px) {
+    .mock-app { flex-direction: column; height: auto; }
+    .mock-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 12px; }
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAVIGATION -->
+<nav class="top-nav">
+  <div class="brand-nav">
+    <!-- SJ Logo -->
+    <div class="sj-logo">
+      <span class="sj-logo-text">Sj</span>
+      <div class="sj-logo-dot"></div>
+    </div>
+    <div>
+      <div style="font-weight:800; font-size:14px; letter-spacing:-0.02em;">PlanForge</div>
+      <div style="font-size:9px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.05em;">by SJ</div>
+    </div>
+  </div>
+  <a href="#inbox" class="nav-link active">Inbox</a>
+  <a href="#drafts" class="nav-link">Drafts</a>
+  <a href="#tracker" class="nav-link">Tracker</a>
+  <a href="#gantt" class="nav-link">Gantt</a>
+  <a href="#changelog" class="nav-link">Change Log</a>
+  <a href="#colors" class="nav-link">Colors</a>
+</nav>
+
+<!-- ═══════ INBOX ═══════ -->
+<section id="inbox">
+  <div class="section-title">Inbox</div>
+  <div class="section-sub">Paste a meeting note or upload a file. The agent extracts tasks, compares them to the current plan, and prepares a draft for review.</div>
+
+  <div class="mock-app">
+    <div class="mock-sidebar">
+      <div class="brand-block">
+        <div class="sj-logo"><span class="sj-logo-text">Sj</span><div class="sj-logo-dot"></div></div>
+        <div>
+          <div class="brand-name">PlanForge</div>
+          <div class="brand-tag">by SJ</div>
+        </div>
+      </div>
+      <div class="sidebar-stats">
+        <div class="stat-box"><div class="sv">52</div><div class="sl">Tasks</div></div>
+        <div class="stat-box"><div class="sv" style="color:var(--text-secondary); font-size:11px; margin-top:4px;">May 02</div><div class="sl">Last Change</div></div>
+      </div>
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item active">
+        <svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+        Inbox
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline class="si" points="14 2 14 8 20 8"/></svg>
+        Drafts
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect class="si" x="9" y="3" width="6" height="4" rx="1"/><path class="si" d="M9 14l2 2 4-4"/></svg>
+        Tracker
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M3 9h18M3 15h18M9 3v18"/></svg>
+        Gantt
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon-svg" viewBox="0 0 24 24"><circle class="si" cx="12" cy="12" r="10"/><polyline class="si" points="12 6 12 12 16 14"/></svg>
+        Change Log
+      </div>
+      <div class="conn-row">
+        <span class="conn-pill conn-ok">● Postgres</span>
+        <span class="conn-pill conn-ok">● LLM</span>
+      </div>
+    </div>
+
+    <div class="mock-main">
+      <div class="page-header">
+        <div class="page-title">Inbox</div>
+        <div class="page-sub">Paste a meeting note or upload a file. The agent extracts tasks, compares them to the current plan, and prepares a draft for review.</div>
+      </div>
+      <div class="card">
+        <div class="form-row">
+          <div class="fg"><label>Title</label><input type="text" placeholder="e.g. Weekly Standup Notes"></div>
+          <div class="fg"><label>Meeting Date</label><input type="text" value="2026-05-02"></div>
+        </div>
+        <div class="form-row">
+          <div class="fg"><label>Source Type</label><select><option>meeting</option><option>email</option><option>chat</option></select></div>
+          <div class="fg"><label>Attendees</label><input type="text" placeholder="e.g. Alice, Bob, Charlie"></div>
+        </div>
+        <div class="fg" style="margin-bottom:16px;"><label>Content</label><textarea rows="5" placeholder="Paste your meeting notes, email, or chat transcript here..."></textarea></div>
+        <button class="btn btn-pri" style="width:100%;">Process with Agent</button>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">Inbox page — clean form card with SJ blue primary button</div>
+</section>
+
+<!-- ═══════ DRAFTS ═══════ -->
+<section id="drafts">
+  <div class="section-title">Drafts</div>
+  <div class="section-sub">Review and approve proposed plan changes. High-confidence items are pre-checked; low-confidence ones are flagged.</div>
+
+  <div class="mock-app">
+    <div class="mock-sidebar">
+      <div class="brand-block">
+        <div class="sj-logo"><span class="sj-logo-text">Sj</span><div class="sj-logo-dot"></div></div>
+        <div><div class="brand-name">PlanForge</div><div class="brand-tag">by SJ</div></div>
+      </div>
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg> Inbox</div>
+      <div class="nav-item active"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline class="si" points="14 2 14 8 20 8"/></svg> Drafts</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect class="si" x="9" y="3" width="6" height="4" rx="1"/><path class="si" d="M9 14l2 2 4-4"/></svg> Tracker</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M3 9h18M3 15h18M9 3v18"/></svg> Gantt</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><circle class="si" cx="12" cy="12" r="10"/><polyline class="si" points="12 6 12 12 16 14"/></svg> Change Log</div>
+    </div>
+
+    <div class="mock-main">
+      <div class="page-header">
+        <div class="page-title">Drafts</div>
+        <div class="page-sub">High-confidence changes are pre-checked for approval. Low-confidence changes are flagged and require an explicit click.</div>
+      </div>
+      <div style="display:flex; gap:16px;">
+        <div style="width:200px; flex-shrink:0;">
+          <div class="card" style="padding:12px;">
+            <div class="card-head" style="margin-bottom:8px;">Pending</div>
+            <div style="background:var(--surface-hi); border-radius:8px; padding:10px; margin-bottom:6px; border-left:3px solid var(--primary);">
+              <div style="font-size:12px; font-weight:600;">2026-05-02 10:30</div>
+              <div style="font-size:11px; color:var(--text-muted);">4 change(s)</div>
+            </div>
+            <div style="border-radius:8px; padding:10px; margin-bottom:6px; color:var(--text-muted);">
+              <div style="font-size:12px;">2026-05-01 14:15</div>
+              <div style="font-size:11px;">2 change(s)</div>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div class="card">
+            <div class="card-head">Draft Summary</div>
+            <div style="font-size:13px;">Proposed 4 changes from the weekly standup: 2 new tasks, 1 update, 1 conflict requiring resolution.</div>
+          </div>
+          <div style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; margin:16px 0 10px;">Proposed Changes (4)</div>
+
+          <!-- Change 1 -->
+          <div class="change-card">
+            <div class="ch-hdr">
+              <span class="badge b-cr">CREATE</span>
+              <span class="badge b-hi">High (92%)</span>
+            </div>
+            <div class="ch-title">Install MEP riser brackets</div>
+            <div class="reason-box">
+              <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Reason</div>
+              Explicitly mentioned in standup with owner and due date.
+            </div>
+            <div class="quote-box">
+              <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Evidence Quote</div>
+              "Rina will install the MEP riser brackets by May 10."
+            </div>
+            <div class="ch-acts">
+              <label><input type="checkbox" checked> Approve</label>
+              <label><input type="checkbox"> Reject</label>
+            </div>
+          </div>
+
+          <!-- Change 2 - Conflict -->
+          <div class="change-card conflict">
+            <div class="ch-hdr">
+              <span class="badge b-cf">CONFLICT</span>
+              <span class="badge b-lo">Low (35%)</span>
+            </div>
+            <div class="ch-title">4D link check</div>
+            <div style="background:rgba(251,191,36,0.08); border:1px solid rgba(251,191,36,0.3); border-radius:8px; padding:10px; margin-top:8px; font-size:12px; color:var(--warning); font-weight:600;">
+              Conflict — 2 possible existing task(s). Pick the right one below, or create a new task.
+            </div>
+            <div class="cand-card prop">
+              <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Agent proposes</div>
+              <div style="font-weight:700; font-size:14px; margin-bottom:4px;">4D link check</div>
+              <div style="font-size:12px; color:var(--text-secondary);">Ivy Chung &nbsp; · &nbsp; Apr 14 &nbsp; · &nbsp; in_progress</div>
+            </div>
+            <div class="cand-card">
+              <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:4px;">Candidate #1</div>
+              <div style="font-weight:700; font-size:14px; margin-bottom:4px;">4D model review</div>
+              <div style="font-size:12px; color:var(--text-secondary);">Ivy Chung &nbsp; · &nbsp; Apr 10 &nbsp; · &nbsp; not_started</div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:10px;">
+              <button class="btn btn-sec" style="flex:1; padding:6px;">Merge → #1</button>
+              <button class="btn btn-sec" style="flex:1; padding:6px;">Keep Separate</button>
+            </div>
+          </div>
+
+          <!-- Change 3 -->
+          <div class="change-card">
+            <div class="ch-hdr">
+              <span class="badge b-up">UPDATE</span>
+              <span class="badge b-hi">High (88%)</span>
+            </div>
+            <div class="ch-title">Update foundation rebar status</div>
+            <div class="reason-box">
+              <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Reason</div>
+              Status change reported in standup.
+            </div>
+            <div class="ch-acts">
+              <label><input type="checkbox" checked> Approve</label>
+              <label><input type="checkbox"> Reject</label>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <button class="btn btn-sec">Approve all</button>
+            <button class="btn btn-sec">Reject all</button>
+            <button class="btn btn-pri" style="margin-left:auto;">Apply decisions</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">Drafts page — change cards with contrasting status colors and SJ blue highlights</div>
+</section>
+
+<!-- ═══════ TRACKER ═══════ -->
+<section id="tracker">
+  <div class="section-title">Tracker</div>
+  <div class="section-sub">Current state of the plan. Updated whenever a draft is approved.</div>
+
+  <div class="mock-app">
+    <div class="mock-sidebar">
+      <div class="brand-block">
+        <div class="sj-logo"><span class="sj-logo-text">Sj</span><div class="sj-logo-dot"></div></div>
+        <div><div class="brand-name">PlanForge</div><div class="brand-tag">by SJ</div></div>
+      </div>
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg> Inbox</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline class="si" points="14 2 14 8 20 8"/></svg> Drafts</div>
+      <div class="nav-item active"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect class="si" x="9" y="3" width="6" height="4" rx="1"/><path class="si" d="M9 14l2 2 4-4"/></svg> Tracker</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M3 9h18M3 15h18M9 3v18"/></svg> Gantt</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><circle class="si" cx="12" cy="12" r="10"/><polyline class="si" points="12 6 12 12 16 14"/></svg> Change Log</div>
+    </div>
+
+    <div class="mock-main">
+      <div class="page-header">
+        <div class="page-title">Tracker</div>
+        <div class="page-sub">Current state of the plan. Updated whenever a draft is approved.</div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-lab">Total Tasks</div>
+          <div class="metric-val" style="color:var(--primary);">52</div>
+        </div>
+        <div class="metric">
+          <div class="metric-lab">Overdue</div>
+          <div class="metric-val" style="color:var(--error);">8</div>
+        </div>
+        <div class="metric">
+          <div class="metric-lab">Pending Drafts</div>
+          <div class="metric-val" style="color:var(--warning);">3</div>
+        </div>
+        <div class="metric">
+          <div class="metric-lab">Applied This Week</div>
+          <div class="metric-val" style="color:var(--success);">12</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; margin:20px 0 10px;">Urgent Attention</div>
+      <div class="table-wrap" style="margin-bottom:20px;">
+        <div class="th"><div>Task</div><div>Owner</div><div>Due</div><div>Status</div><div>Priority</div></div>
+        <div class="tr tr-over">
+          <div class="c-task">Riser strategy</div><div class="c-own">Rina Ali</div><div class="c-date" style="color:var(--error);">Mar 29</div>
+          <div><span class="badge b-bl">Blocked</span></div><div style="color:var(--error); font-weight:600;">High</div>
+        </div>
+        <div class="tr tr-over">
+          <div class="c-task">Foundation rebar</div><div class="c-own">Sam Lee</div><div class="c-date" style="color:var(--error);">Mar 30</div>
+          <div><span class="badge b-ip">In Progress</span></div><div style="color:var(--error); font-weight:600;">High</div>
+        </div>
+      </div>
+
+      <div class="filters">
+        <div class="fg"><label>Status</label><select><option>All statuses</option></select></div>
+        <div class="fg"><label>Owner</label><select><option>All owners</option></select></div>
+        <div class="fg" style="display:flex; align-items:flex-end;">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer;"><input type="checkbox" checked> Hide completed</label>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="th"><div>Task</div><div>Owner</div><div>Due</div><div>Status</div><div>Priority</div></div>
+        <div class="tr tr-over">
+          <div class="c-task">Riser strategy</div><div class="c-own">Rina Ali</div><div class="c-date" style="color:var(--error);">Mar 29</div>
+          <div><span class="badge b-bl">Blocked</span></div><div style="color:var(--error);">High</div>
+        </div>
+        <div class="tr tr-soon">
+          <div class="c-task">4D link check</div><div class="c-own">Ivy Chung</div><div class="c-date" style="color:var(--warning);">Apr 14</div>
+          <div><span class="badge b-ip">In Progress</span></div><div style="color:var(--warning);">Medium</div>
+        </div>
+        <div class="tr">
+          <div class="c-task">MEP loads</div><div class="c-own">Anika Chen</div><div class="c-date">Apr 05</div>
+          <div><span class="badge b-ns">Not Started</span></div><div>Low</div>
+        </div>
+        <div class="tr tr-done">
+          <div class="c-task">Cost plan</div><div class="c-own">Lina Tan</div><div class="c-date">Apr 05</div>
+          <div><span class="badge b-dn">Done</span></div><div>Low</div>
+        </div>
+        <div class="tr">
+          <div class="c-task">Façade inspection</div><div class="c-own">Kenji O.</div><div class="c-date">Apr 18</div>
+          <div><span class="badge b-ns">Not Started</span></div><div>Medium</div>
+        </div>
+        <div class="tr">
+          <div class="c-task">Install brackets</div><div class="c-own">Rina Ali</div><div class="c-date">May 02</div>
+          <div><span class="badge b-ip">In Progress</span></div><div>Medium</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">Tracker page — discrete status colors with soft coral for blocked, slate gray for not started, teal for done</div>
+</section>
+
+<!-- ═══════ GANTT ═══════ -->
+<section id="gantt">
+  <div class="section-title">Gantt</div>
+  <div class="section-sub">Visual timeline. Bars span from task creation to due date.</div>
+
+  <div class="mock-app">
+    <div class="mock-sidebar">
+      <div class="brand-block">
+        <div class="sj-logo"><span class="sj-logo-text">Sj</span><div class="sj-logo-dot"></div></div>
+        <div><div class="brand-name">PlanForge</div><div class="brand-tag">by SJ</div></div>
+      </div>
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg> Inbox</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline class="si" points="14 2 14 8 20 8"/></svg> Drafts</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect class="si" x="9" y="3" width="6" height="4" rx="1"/><path class="si" d="M9 14l2 2 4-4"/></svg> Tracker</div>
+      <div class="nav-item active"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M3 9h18M3 15h18M9 3v18"/></svg> Gantt</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><circle class="si" cx="12" cy="12" r="10"/><polyline class="si" points="12 6 12 12 16 14"/></svg> Change Log</div>
+    </div>
+
+    <div class="mock-main">
+      <div class="page-header">
+        <div class="page-title">Gantt</div>
+        <div class="page-sub">Visual timeline. Bars span from task creation to due date.</div>
+      </div>
+
+      <div class="g-area">
+        <div class="g-today" style="left:55%;"></div>
+        <div class="g-today-lbl" style="left:calc(55% + 8px);">Today</div>
+
+        <div class="g-bar" style="background:var(--not-started); width:40%; margin-left:10%;">
+          <span class="g-label">Foundation rebar</span> Mar 15 – Apr 05
+        </div>
+        <div class="g-bar" style="background:var(--error); width:25%; margin-left:10%;">
+          <span class="g-label">Riser strategy</span> Mar 20 – Mar 29
+        </div>
+        <div class="g-bar" style="background:var(--primary); width:35%; margin-left:25%;">
+          <span class="g-label">4D link check</span> Mar 28 – Apr 14
+        </div>
+        <div class="g-bar" style="background:var(--not-started); width:30%; margin-left:20%;">
+          <span class="g-label">MEP loads</span> Mar 25 – Apr 05
+        </div>
+        <div class="g-bar" style="background:var(--success); width:28%; margin-left:12%;">
+          <span class="g-label">Cost plan</span> Mar 18 – Apr 05
+        </div>
+        <div class="g-bar" style="background:var(--not-started); width:32%; margin-left:35%;">
+          <span class="g-label">Façade inspection</span> Apr 10 – Apr 18
+        </div>
+        <div class="g-bar" style="background:var(--primary); width:20%; margin-left:40%;">
+          <span class="g-label">Install brackets</span> Apr 12 – May 02
+        </div>
+      </div>
+
+      <div style="display:flex; gap:16px; margin-top:16px; justify-content:center;">
+        <span class="badge b-ns">Not Started</span>
+        <span class="badge b-ip">In Progress</span>
+        <span class="badge b-bl">Blocked</span>
+        <span class="badge b-dn">Done</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">Gantt page — color-coded bars using new status palette + dashed "Today" marker</div>
+</section>
+
+<!-- ═══════ CHANGE LOG ═══════ -->
+<section id="changelog">
+  <div class="section-title">Change Log</div>
+  <div class="section-sub">Every applied change with before/after snapshots and source evidence.</div>
+
+  <div class="mock-app">
+    <div class="mock-sidebar">
+      <div class="brand-block">
+        <div class="sj-logo"><span class="sj-logo-text">Sj</span><div class="sj-logo-dot"></div></div>
+        <div><div class="brand-name">PlanForge</div><div class="brand-tag">by SJ</div></div>
+      </div>
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg> Inbox</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline class="si" points="14 2 14 8 20 8"/></svg> Drafts</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect class="si" x="9" y="3" width="6" height="4" rx="1"/><path class="si" d="M9 14l2 2 4-4"/></svg> Tracker</div>
+      <div class="nav-item"><svg class="nav-icon-svg" viewBox="0 0 24 24"><path class="si" d="M3 9h18M3 15h18M9 3v18"/></svg> Gantt</div>
+      <div class="nav-item active"><svg class="nav-icon-svg" viewBox="0 0 24 24"><circle class="si" cx="12" cy="12" r="10"/><polyline class="si" points="12 6 12 12 16 14"/></svg> Change Log</div>
+    </div>
+
+    <div class="mock-main">
+      <div class="page-header">
+        <div class="page-title">Change Log</div>
+        <div class="page-sub">Every applied change with before/after snapshots and source evidence.</div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 16px; margin-bottom:18px;">
+        <div style="font-size:14px; font-weight:600;">Weekly Executive Digest</div>
+        <button class="btn btn-pri">Generate digest</button>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:20px;">
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center;">
+          <div style="font-size:22px; font-weight:800;">24</div>
+          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Total Changes</div>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:var(--success);">8</div>
+          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Created</div>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:var(--primary);">14</div>
+          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Updated</div>
+        </div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px; text-align:center;">
+          <div style="font-size:22px; font-weight:800; color:var(--error);">2</div>
+          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Deleted</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:10px;">Audit Timeline</div>
+
+      <div class="tl">
+        <div class="tl-dot">
+          <div class="dot" style="background:var(--success); box-shadow: 0 0 0 4px rgba(45,212,191,0.2);"></div>
+          <div class="line"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-meta">
+            <span class="tl-time">2026-05-02 10:45</span>
+            <span class="badge b-cr">CREATE</span>
+          </div>
+          <div class="tl-diff">title: None → 'Install MEP riser brackets', owner: None → 'Rina Ali', due_date: None → '2026-05-10'</div>
+          <div class="tl-evid">"Rina will install the MEP riser brackets by May 10."</div>
+          <div class="tl-apr">Approved by reviewer</div>
+        </div>
+      </div>
+
+      <div class="tl">
+        <div class="tl-dot">
+          <div class="dot" style="background:var(--primary); box-shadow: 0 0 0 4px rgba(37,99,235,0.2);"></div>
+          <div class="line"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-meta">
+            <span class="tl-time">2026-05-02 10:45</span>
+            <span class="badge b-up">UPDATE</span>
+          </div>
+          <div class="tl-diff">status: 'not_started' → 'in_progress'</div>
+          <div class="tl-evid">"Ivy has started the 4D link check ahead of schedule."</div>
+          <div class="tl-apr">Approved by reviewer</div>
+        </div>
+      </div>
+
+      <div class="tl">
+        <div class="tl-dot">
+          <div class="dot" style="background:var(--error); box-shadow: 0 0 0 4px rgba(248,113,113,0.2);"></div>
+          <div class="line"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-meta">
+            <span class="tl-time">2026-05-01 16:20</span>
+            <span class="badge b-de">DELETE</span>
+          </div>
+          <div class="tl-diff">title: 'Old scaffolding plan', owner: 'Sam Lee', status: 'not_started'</div>
+          <div class="tl-evid">"The old scaffolding plan is no longer relevant after design change."</div>
+          <div class="tl-apr">Approved by reviewer</div>
+        </div>
+      </div>
+
+      <div class="tl">
+        <div class="tl-dot">
+          <div class="dot" style="background:var(--success); box-shadow: 0 0 0 4px rgba(45,212,191,0.2);"></div>
+          <div class="line"></div>
+        </div>
+        <div class="tl-body">
+          <div class="tl-meta">
+            <span class="tl-time">2026-04-30 09:10</span>
+            <span class="badge b-cr">CREATE</span>
+          </div>
+          <div class="tl-diff">title: None → 'Façade inspection', owner: None → 'Kenji O.', due_date: None → '2026-04-18'</div>
+          <div class="tl-evid">"Kenji will handle the façade inspection next week."</div>
+          <div class="tl-apr">Approved by reviewer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">Change Log page — timeline with color-coded dots matching operation types and new discrete palette</div>
+</section>
+
+<!-- ═══════ COLOR SYSTEM ═══════ -->
+<section id="colors">
+  <div class="section-title">Design System</div>
+  <div class="section-sub">PlanForge by SJ — dark mode with SJ Royal Blue and discrete semantic status colors.</div>
+
+  <div class="card">
+    <div class="card-head">Brand Colors</div>
+    <div class="cgrid">
+      <div class="swatch" style="background:#2563EB;">Primary<br>#2563EB</div>
+      <div class="swatch" style="background:#1D4ED8;">Hover<br>#1D4ED8</div>
+      <div class="swatch" style="background:#3B82F6;">Accent<br>#3B82F6</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">Surfaces</div>
+    <div class="cgrid">
+      <div class="swatch" style="background:#0B0F19; color:#6B7280;">Background<br>#0B0F19</div>
+      <div class="swatch" style="background:#111827; color:#6B7280;">Surface<br>#111827</div>
+      <div class="swatch" style="background:#1F2937;">Surface Hi<br>#1F2937</div>
+      <div class="swatch" style="background:#374151;">Border<br>#374151</div>
+      <div class="swatch" style="background:#F9FAFB; color:#374151;">Text<br>#F9FAFB</div>
+      <div class="swatch" style="background:#9CA3AF;">Text Alt<br>#9CA3AF</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">Status Colors (Discrete & Contrasting)</div>
+    <div class="cgrid">
+      <div class="swatch" style="background:#64748B;">Not Started<br>#64748B</div>
+      <div class="swatch" style="background:#2563EB;">In Progress<br>#2563EB</div>
+      <div class="swatch" style="background:#F87171;">Blocked<br>#F87171</div>
+      <div class="swatch" style="background:#2DD4BF;">Done<br>#2DD4BF</div>
+      <div class="swatch" style="background:#FBBF24; color:#374151;">Conflict<br>#FBBF24</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">Operation Colors</div>
+    <div class="cgrid">
+      <div class="swatch" style="background:#2DD4BF;">Create<br>#2DD4BF</div>
+      <div class="swatch" style="background:#2563EB;">Update<br>#2563EB</div>
+      <div class="swatch" style="background:#F87171;">Delete<br>#F87171</div>
+      <div class="swatch" style="background:#FBBF24; color:#374151;">Conflict<br>#FBBF24</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">Typography</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px;">
+      <div>
+        <div style="font-size:26px; font-weight:800; letter-spacing:-0.02em; margin-bottom:4px;">Page Title</div>
+        <div style="font-size:12px; color:var(--text-muted);">26px / 800 weight</div>
+      </div>
+      <div>
+        <div style="font-size:14px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:4px;">Section Label</div>
+        <div style="font-size:12px; color:var(--text-muted);">11px / uppercase / 700</div>
+      </div>
+      <div>
+        <div style="font-size:14px; font-weight:600; margin-bottom:4px;">Body Text</div>
+        <div style="font-size:12px; color:var(--text-muted);">13px / 600 weight / Inter</div>
+      </div>
+      <div>
+        <div style="font-size:28px; font-weight:800; color:var(--primary); margin-bottom:4px;">Metric Value</div>
+        <div style="font-size:12px; color:var(--text-muted);">28px / 800 weight / colored</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">Components</div>
+    <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:10px;">
+      <button class="btn btn-pri">Primary Button</button>
+      <button class="btn btn-sec">Secondary Button</button>
+      <span class="badge b-ns">Not Started</span>
+      <span class="badge b-ip">In Progress</span>
+      <span class="badge b-bl">Blocked</span>
+      <span class="badge b-dn">Done</span>
+      <span class="badge b-cr">CREATE</span>
+      <span class="badge b-up">UPDATE</span>
+      <span class="badge b-cf">CONFLICT</span>
+      <span class="badge b-de">DELETE</span>
+    </div>
+  </div>
+
+  <!-- Logo Specs -->
+  <div class="card">
+    <div class="card-head">SJ Logo</div>
+    <div style="display:flex; align-items:center; gap:20px;">
+      <div class="sj-logo" style="width:48px; height:48px; border-radius:10px;">
+        <span class="sj-logo-text" style="font-size:22px;">Sj</span>
+        <div class="sj-logo-dot" style="width:9px; height:9px; top:9px; right:9px;"></div>
+      </div>
+      <div>
+        <div style="font-weight:800; font-size:18px; letter-spacing:-0.02em;">PlanForge</div>
+        <div style="font-size:12px; color:var(--text-muted); font-weight:600;">by SJ</div>
+      </div>
+      <div style="font-size:12px; color:var(--text-muted); margin-left:auto;">
+        CSS-only replica · Blue square #2563EB · White "Sj" · Red dot #EF4444
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer style="text-align:center; padding:40px 20px; color:var(--text-muted); font-size:12px;">
+  <div class="sj-logo" style="width:24px; height:24px; border-radius:6px; margin:0 auto 8px;">
+    <span style="color:#fff; font-size:12px; font-weight:800;">Sj</span>
+    <div style="position:absolute; width:5px; height:5px; border-radius:50%; background:#EF4444; top:4px; right:5px;"></div>
+  </div>
+  PlanForge by SJ — Microsoft Code Without Barriers Hackathon 2026 — UI Design Review
+</footer>
+
+</body>
+</html>
