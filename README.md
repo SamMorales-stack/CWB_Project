@@ -49,28 +49,33 @@ Nothing reaches the official tracker without explicit human approval.
 - **Evidence-quote pinning** — every applied plan change traceable to the exact source sentence in the meeting note
 - **Weekly executive digest** — one-click agent summary of the last 7 days of plan changes for stakeholder reporting
 
+### Stretch Features
+- **Bidirectional traceability** — click any task in the Tracker to see every change ever applied to it, with timestamps, diffs, and the exact evidence quote from the source note
+- **Change detection vs. baseline** — compares the live plan against the original `tasks_master.csv` dataset, highlighting owner changes, date shifts > 7 days, and status changes
+- **Replay mode** — step through all ingested meeting notes chronologically with Prev/Next navigation, seeing exactly what each note contributed to the plan
+
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│              Streamlit Web App (Azure Container Apps)    │
-│   Pages: Inbox · Drafts · Tracker · Gantt · Change Log  │
-└─────────────────┬───────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│         Streamlit Web App (Azure Container Apps)             │
+│  Pages: Inbox · Drafts · Tracker · Gantt · Change Log · Replay │
+└─────────────────┬───────────────────────────────────────────┘
                   │
                   ▼
-┌─────────────────────────────────────────────────────────┐
-│                    PlannerService                        │
-│   ingest_note · run_pipeline · apply_draft · digest      │
-└──────────┬──────────────────────────────┬───────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                      PlannerService                          │
+│    ingest_note · run_pipeline · apply_draft · digest         │
+└──────────┬──────────────────────────────┬───────────────────┘
            │                              │
            ▼                              ▼
-┌──────────────────────┐    ┌─────────────────────────────┐
-│  PlannerAgent        │    │  Repository layer            │
-│  extract_tasks       │    │  meeting_notes · tasks       │
-│  classify_change     │    │  pending_drafts · change_log │
-│  generate_draft      │    └────────────────┬────────────┘
+┌──────────────────────┐    ┌─────────────────────────────────┐
+│  PlannerAgent        │    │  Repository layer                │
+│  extract_tasks       │    │  meeting_notes · tasks           │
+│  classify_change     │    │  pending_drafts · change_log     │
+│  generate_draft      │    └────────────────┬────────────────┘
 │  summarize_changes   │                     │
 └──────────┬───────────┘                     ▼
            │                    ┌────────────────────────┐
@@ -87,8 +92,6 @@ Nothing reaches the official tracker without explicit human approval.
 - **PlannerService** — owns the workflow
 - **PlannerAgent** — four LLM-backed tools with Pydantic-validated structured outputs
 - **Repository layer** — typed CRUD over four PostgreSQL tables
-
-Full design specification: [`docs/superpowers/specs/2026-05-01-sj-project-planner-agent-design.md`](docs/superpowers/specs/2026-05-01-sj-project-planner-agent-design.md)
 
 ---
 
@@ -109,7 +112,7 @@ Full design specification: [`docs/superpowers/specs/2026-05-01-sj-project-planne
 ## Dataset
 
 Uses the official **CWB_SJ dataset** (CC0 license) from [github.com/DoreenSteven/CWB_SJ](https://github.com/DoreenSteven/CWB_SJ):
-- `tasks_master.csv` → loaded as the baseline plan
+- `tasks_master.csv` → loaded as the baseline plan (~50 tasks)
 - `meeting_notes.jsonl` → first 10 notes available to process through the agent
 - `emails.csv` → first 5 emails available as email-type meeting notes
 
@@ -121,7 +124,7 @@ Click **Load sample dataset** in the sidebar to populate the app instantly for d
 
 **Prerequisites:** Python 3.12, Docker Desktop, an OpenCode Go API key from [opencode.ai](https://opencode.ai)
 
-```bash
+```powershell
 # 1. Clone
 git clone https://github.com/SamMorales-stack/CWB_Project.git
 cd CWB_Project
@@ -131,11 +134,11 @@ docker compose up -d postgres
 
 # 3. Python environment
 python -m venv .venv
-source .venv/Scripts/activate    # Git Bash on Windows
+.venv\Scripts\activate          # PowerShell on Windows
 pip install -e ".[dev]"
 
 # 4. Configure
-cp .env.example .env
+copy .env.example .env
 # Edit .env: set OPENCODE_API_KEY and DATABASE_URL
 
 # 5. Run migrations
