@@ -39,3 +39,11 @@ def get(session: Session, note_id: uuid.UUID) -> MeetingNote | None:
 def list_recent(session: Session, limit: int = 50) -> list[MeetingNote]:
     stmt = select(MeetingNote).order_by(MeetingNote.ingested_at.desc()).limit(limit)
     return list(session.scalars(stmt))
+
+
+def list_chronological(session: Session) -> list[MeetingNote]:
+    stmt = select(MeetingNote).order_by(
+        MeetingNote.meeting_date.asc().nulls_last(),
+        MeetingNote.ingested_at.asc(),
+    )
+    return list(session.scalars(stmt))

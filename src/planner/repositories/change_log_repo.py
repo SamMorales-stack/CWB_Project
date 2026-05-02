@@ -40,6 +40,28 @@ def list_recent(session: Session, limit: int = 50) -> list[ChangeLogEntry]:
     return list(session.scalars(stmt))
 
 
+def list_for_task(session: Session, task_id: uuid.UUID) -> list[ChangeLogEntry]:
+    stmt = (
+        select(ChangeLogEntry)
+        .where(ChangeLogEntry.task_id == task_id)
+        .order_by(ChangeLogEntry.applied_at.desc())
+    )
+    return list(session.scalars(stmt))
+
+
+def list_for_note(session: Session, note_id: uuid.UUID) -> list[ChangeLogEntry]:
+    """All applied change_log entries from drafts that originated from a meeting note."""
+    from planner.models import PendingDraft  # local import avoids circular
+
+    stmt = (
+        select(ChangeLogEntry)
+        .join(PendingDraft, ChangeLogEntry.draft_id == PendingDraft.id)
+        .where(PendingDraft.source_note_id == note_id)
+        .order_by(ChangeLogEntry.applied_at.asc())
+    )
+    return list(session.scalars(stmt))
+
+
 def list_since(session: Session, *, since: datetime) -> list[ChangeLogEntry]:
     stmt = (
         select(ChangeLogEntry)
