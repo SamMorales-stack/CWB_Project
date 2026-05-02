@@ -14,14 +14,14 @@ from planner.ui.styles import COLORS, empty_state
 _STATUS_LABELS = {
     "not_started": "Not Started",
     "in_progress": "In Progress",
-    "blocked":     "Blocked",
+    "blocked":     "On Hold",
     "done":        "Done",
 }
 
 _STATUS_COLORS = {
     "Not Started": "#64748B",
     "In Progress": "#2563EB",
-    "Blocked":     "#EF4444",
+    "On Hold":     "#EF4444",
     "Done":        "#2DD4BF",
 }
 

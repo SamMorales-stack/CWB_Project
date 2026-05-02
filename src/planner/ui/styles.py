@@ -33,7 +33,7 @@ STATUS_PALETTE = {
 STATUS_LABELS = {
     "not_started": "Not Started",
     "in_progress": "In Progress",
-    "blocked": "Blocked",
+    "blocked": "On Hold",
     "done": "Done",
     "conflict": "Conflict",
 }
