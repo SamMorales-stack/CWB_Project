@@ -16,6 +16,7 @@ COPY pyproject.toml ./
 COPY src ./src
 COPY alembic.ini ./
 COPY alembic ./alembic
+COPY .streamlit ./.streamlit
 
 RUN pip install -e .
 
