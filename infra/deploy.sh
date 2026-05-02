@@ -3,8 +3,8 @@
 #
 # Required environment variables (set before running):
 #   APP_NAME            unique short name, e.g. sjplanner-sm7k3x
-#   LOCATION            Azure region, e.g. eastasia  (match your subscription's allowed regions)
-#   GOOGLE_API_KEY      Gemini API key from aistudio.google.com (free, no credit card)
+#   LOCATION            Azure region matching your subscription policy (e.g. eastasia)
+#   OPENCODE_API_KEY    OpenCode Go API key from opencode.ai workspace
 #   PG_ADMIN_PASSWORD   Postgres admin password (16+ chars, mixed case + digit + symbol)
 #
 # Usage: export the vars above, then run ./infra/deploy.sh
@@ -14,7 +14,7 @@ set -euo pipefail
 
 : "${APP_NAME:?must set APP_NAME}"
 : "${LOCATION:?must set LOCATION}"
-: "${GOOGLE_API_KEY:?must set GOOGLE_API_KEY}"
+: "${OPENCODE_API_KEY:?must set OPENCODE_API_KEY}"
 : "${PG_ADMIN_PASSWORD:?must set PG_ADMIN_PASSWORD}"
 
 RG="${APP_NAME}-rg"
@@ -96,12 +96,12 @@ else
         --ingress external \
         --min-replicas 1 \
         --max-replicas 1 \
-        --secrets "pg-url=$DATABASE_URL" "gemini-key=$GOOGLE_API_KEY" \
+        --secrets "pg-url=$DATABASE_URL" "llm-key=$OPENCODE_API_KEY" \
         --env-vars \
             "DATABASE_URL=secretref:pg-url" \
-            "GOOGLE_API_KEY=secretref:gemini-key" \
-            "AZURE_OPENAI_DEPLOYMENT_MAIN=gemini-2.0-flash" \
-            "AZURE_OPENAI_DEPLOYMENT_FAST=gemini-2.0-flash" \
+            "OPENCODE_API_KEY=secretref:llm-key" \
+            "AZURE_OPENAI_DEPLOYMENT_MAIN=deepseek-v4-pro" \
+            "AZURE_OPENAI_DEPLOYMENT_FAST=deepseek-v4-flash" \
         --output none
 fi
 
