@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     azure_openai_deployment_fast: str = "deepseek-v4-flash"
     app_name: str = "SJ Project Planner Agent"
     log_level: str = "INFO"
+    webhook_api_key: str = "change-me-in-production"
 
 
 @lru_cache(maxsize=1)

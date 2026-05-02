@@ -53,6 +53,18 @@ def _sidebar_stats() -> tuple[int, str]:
         return 0, "—"
 
 
+def _start_webhook_once() -> None:
+    """Start the webhook API server in a background thread (only once per process)."""
+    if st.session_state.get("_webhook_started"):
+        return
+    try:
+        from planner.webhook import start_in_background
+        start_in_background(port=8502)
+        st.session_state["_webhook_started"] = True
+    except Exception:
+        pass
+
+
 def main() -> None:
     st.set_page_config(
         page_title="PlanForge",
@@ -63,6 +75,7 @@ def main() -> None:
 
     inject_global_css()
     _ = get_settings()
+    _start_webhook_once()
 
     # ── Sidebar ──────────────────────────────────────────────────────────────
     with st.sidebar:
@@ -148,6 +161,17 @@ def main() -> None:
             from planner.ui.sample_data import load_samples
             count = load_samples()
             n.success(f"Loaded {count} note(s).")
+
+        st.markdown("---")
+        st.markdown(
+            f'<div style="font-size:10px;font-weight:700;color:{COLORS["text_muted"]};'
+            f'text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Webhook API</div>'
+            f'<div style="font-size:11px;color:{COLORS["text_secondary"]};line-height:1.6;">'
+            f'POST meeting transcripts automatically:<br>'
+            f'<code style="font-size:10px;color:{COLORS["primary"]};">localhost:8502/api/ingest</code>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
     # ── Main Content ─────────────────────────────────────────────────────────
     if page == "Inbox":
