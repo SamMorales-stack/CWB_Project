@@ -1,7 +1,7 @@
 """Gantt page: Plotly timeline of tasks colored by status."""
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 
 import pandas as pd
 import plotly.express as px
@@ -35,7 +35,7 @@ def render() -> None:
 
     for r in plottable:
         if r["start"] is None or r["start"] >= r["finish"]:
-            r["start"] = r["finish"] - timedelta(days=7)
+            r["start"] = r["finish"] - pd.Timedelta(days=7)
 
     df = pd.DataFrame(plottable)
     df["Start"] = pd.to_datetime(df["start"])
