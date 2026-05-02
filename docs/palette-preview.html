@@ -2,81 +2,189 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>SJ Planner — Palette Preview</title>
+<title>SJ Planner — Design System Preview</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111; color: #eee; padding: 24px; }
-  h1 { text-align: center; color: #fff; margin-bottom: 32px; font-size: 22px; letter-spacing: 1px; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0B0F19;
+    color: #F9FAFB;
+    padding: 32px;
+    line-height: 1.5;
+  }
+  h1 {
+    text-align: center;
+    color: #F9FAFB;
+    margin-bottom: 8px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    text-align: center;
+    color: #6B7280;
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
   .palettes { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; }
-  .palette { width: 580px; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.6); }
+  .palette { width: 620px; border-radius: 16px; overflow: hidden; border: 1px solid #374151; }
 
-  /* ---- PALETTE A ---- */
-  .a-bg   { background: #0E1117; }
-  .a-surf { background: #1C2333; }
-  .a-pri  { background: #0B4F6C; }
-  .a-acc  { background: #01BAEF; }
-  .a-ok   { background: #20BF55; }
-  .a-err  { background: #FB3640; }
-  .a-warn { background: #F4A261; }
+  /* ---- New Design System ---- */
+  .ds-bg   { background: #0B0F19; }
+  .ds-surf { background: #111827; }
+  .ds-surf-hi { background: #1F2937; }
+  .ds-pri  { background: #06B6D4; }
+  .ds-acc  { background: #8B5CF6; }
+  .ds-ok   { background: #10B981; }
+  .ds-err  { background: #EF4444; }
+  .ds-warn { background: #F59E0B; }
 
-  /* ---- PALETTE B ---- */
-  .b-bg   { background: #1A1A2E; }
-  .b-surf { background: #16213E; }
-  .b-pri  { background: #3D155F; }
-  .b-acc  { background: #9B5DE5; }
-  .b-ok   { background: #00BBF9; }
-  .b-err  { background: #F15BB5; }
-  .b-warn { background: #FEE440; }
+  .header {
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #111827;
+    border-bottom: 1px solid #374151;
+  }
+  .header h2 { font-size: 15px; font-weight: 700; color: #F9FAFB; letter-spacing: -0.01em; }
+  .header .sub { font-size: 12px; color: #6B7280; margin-top: 2px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: #06B6D4; box-shadow: 0 0 0 4px rgba(6,182,212,0.2); }
 
-  .header { padding: 18px 22px; display: flex; align-items: center; gap: 12px; }
-  .header h2 { font-size: 15px; font-weight: 700; color: #fff; }
-  .header .sub { font-size: 12px; color: rgba(255,255,255,0.5); }
-  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .sidebar-main { display: flex; height: 440px; }
+  .sidebar {
+    width: 180px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+    background: #111827;
+    border-right: 1px solid #374151;
+  }
+  .nav-item {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #9CA3AF;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.15s ease;
+  }
+  .nav-item:hover { background: #1F2937; color: #F9FAFB; }
+  .nav-item.active {
+    background: #1F2937;
+    color: #06B6D4;
+    font-weight: 600;
+    border-left: 3px solid #06B6D4;
+  }
+  .main { flex: 1; padding: 20px; overflow: hidden; background: #0B0F19; }
 
-  .sidebar-main { display: flex; height: 420px; }
-  .sidebar { width: 170px; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; }
-  .nav-item { padding: 8px 12px; border-radius: 8px; font-size: 13px; color: rgba(255,255,255,0.6); cursor: pointer; }
-  .nav-item.active { color: #fff; font-weight: 600; }
-  .main { flex: 1; padding: 20px; overflow: hidden; }
-
-  .page-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .page-sub { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 16px; }
+  .page-title { font-size: 20px; font-weight: 800; color: #F9FAFB; margin-bottom: 4px; letter-spacing: -0.02em; }
+  .page-sub { font-size: 12px; color: #6B7280; margin-bottom: 16px; }
 
   .metrics { display: flex; gap: 10px; margin-bottom: 16px; }
-  .metric { flex: 1; border-radius: 10px; padding: 10px 12px; }
-  .metric .val { font-size: 22px; font-weight: 700; color: #fff; }
-  .metric .lbl { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+  .metric {
+    flex: 1;
+    border-radius: 12px;
+    padding: 14px;
+    background: #111827;
+    border: 1px solid #374151;
+  }
+  .metric .val { font-size: 24px; font-weight: 800; color: #F9FAFB; line-height: 1; }
+  .metric .lbl { font-size: 10px; color: #6B7280; margin-top: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 
-  .table-wrap { border-radius: 10px; overflow: hidden; }
-  .table-head { display: flex; padding: 8px 12px; font-size: 11px; color: rgba(255,255,255,0.4); text-transform: uppercase; letter-spacing: 0.5px; }
-  .table-row  { display: flex; padding: 9px 12px; font-size: 12px; color: rgba(255,255,255,0.85); border-top: 1px solid rgba(255,255,255,0.05); align-items: center; }
-  .table-row:hover { background: rgba(255,255,255,0.04); }
-  .col-task { flex: 2; }
-  .col-owner { flex: 1.2; }
+  .table-wrap { border-radius: 12px; overflow: hidden; border: 1px solid #374151; }
+  .table-head {
+    display: flex;
+    padding: 10px 14px;
+    font-size: 11px;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    background: #111827;
+    border-bottom: 1px solid #374151;
+  }
+  .table-row {
+    display: flex;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #E5E7EB;
+    border-top: 1px solid rgba(55,65,81,0.5);
+    align-items: center;
+    transition: background 0.1s;
+  }
+  .table-row:hover { background: #111827; }
+  .col-task { flex: 2; font-weight: 500; }
+  .col-owner { flex: 1.2; color: #9CA3AF; }
   .col-date { flex: 1; }
   .col-status { flex: 1; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
 
-  .chips { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
-  .chip { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .chips { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .chip {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid transparent;
+  }
 
-  .label { text-align: center; padding: 8px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
+  .label {
+    text-align: center;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6B7280;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .color-swatch {
+    height: 56px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 </style>
 </head>
 <body>
 
-<h1>🎨 SJ Project Planner — Palette Preview</h1>
+<h1>📋 SJ Project Planner — Design System</h1>
+<div class="subtitle">Modern dark UI with cyan primary, violet accents, and semantic status colors</div>
 
 <div class="palettes">
 
-  <!-- ========== PALETTE A ========== -->
+  <!-- ========== MAIN PREVIEW ========== -->
   <div>
-    <div class="label">Option A — Ocean Professional</div>
-    <div class="palette a-bg" style="border: 1px solid #01BAEF33;">
+    <div class="label">App Preview — Deep Slate Theme</div>
+    <div class="palette ds-bg">
 
       <!-- header bar -->
-      <div class="header a-pri">
-        <div class="dot a-acc"></div>
+      <div class="header">
+        <div class="dot"></div>
         <div>
           <h2>SJ Project Planner Agent</h2>
           <div class="sub">Harbour Bridge Expansion · 52 tasks</div>
@@ -85,192 +193,127 @@
 
       <div class="sidebar-main">
         <!-- sidebar -->
-        <div class="sidebar a-surf">
-          <div class="nav-item active a-surf" style="background:#0B4F6C;color:#01BAEF">📥 Inbox</div>
-          <div class="nav-item">📋 Drafts</div>
+        <div class="sidebar">
+          <div class="nav-item active">📥 Inbox</div>
+          <div class="nav-item">📝 Drafts</div>
           <div class="nav-item">📊 Tracker</div>
           <div class="nav-item">📅 Gantt</div>
-          <div class="nav-item">🕓 Change Log</div>
+          <div class="nav-item">🕘 Change Log</div>
           <div style="flex:1"></div>
-          <div style="padding:8px;font-size:11px;color:rgba(255,255,255,0.35)">
-            Postgres ✅<br>LLM ✅
+          <div style="padding:8px;font-size:11px;color:#6B7280">
+            Postgres <span style="color:#10B981">●</span><br>LLM <span style="color:#10B981">●</span>
           </div>
         </div>
 
         <!-- main content -->
-        <div class="main a-bg">
+        <div class="main">
           <div class="page-title">Tracker</div>
           <div class="page-sub">Current state of the plan. Updated when drafts are approved.</div>
 
           <!-- metrics -->
           <div class="metrics">
-            <div class="metric a-surf">
-              <div class="val" style="color:#01BAEF">52</div>
+            <div class="metric">
+              <div class="val" style="color:#06B6D4">52</div>
               <div class="lbl">Total Tasks</div>
             </div>
-            <div class="metric a-surf">
-              <div class="val" style="color:#FB3640">8</div>
+            <div class="metric">
+              <div class="val" style="color:#EF4444">8</div>
               <div class="lbl">Overdue</div>
             </div>
-            <div class="metric a-surf">
-              <div class="val" style="color:#F4A261">3</div>
+            <div class="metric">
+              <div class="val" style="color:#F59E0B">3</div>
               <div class="lbl">Pending Drafts</div>
             </div>
-            <div class="metric a-surf">
-              <div class="val" style="color:#20BF55">12</div>
+            <div class="metric">
+              <div class="val" style="color:#10B981">12</div>
               <div class="lbl">Applied This Week</div>
             </div>
           </div>
 
           <!-- table -->
-          <div class="table-wrap a-surf">
+          <div class="table-wrap">
             <div class="table-head">
               <div class="col-task">Task</div>
               <div class="col-owner">Owner</div>
               <div class="col-date">Due</div>
               <div class="col-status">Status</div>
             </div>
-            <div class="table-row" style="background:rgba(251,54,64,0.1)">
+            <div class="table-row" style="background:rgba(239,68,68,0.08)">
               <div class="col-task">Riser strategy</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Rina Ali</div>
-              <div class="col-date" style="color:#FB3640">Mar 29</div>
-              <div class="col-status"><span class="badge" style="background:rgba(251,54,64,0.2);color:#FB3640">blocked</span></div>
+              <div class="col-owner">Rina Ali</div>
+              <div class="col-date" style="color:#EF4444">Mar 29</div>
+              <div class="col-status"><span class="badge" style="background:rgba(239,68,68,0.15);color:#EF4444;border-color:rgba(239,68,68,0.3)">Blocked</span></div>
             </div>
-            <div class="table-row" style="background:rgba(244,162,97,0.08)">
+            <div class="table-row" style="background:rgba(6,182,212,0.06)">
               <div class="col-task">4D link check</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Ivy Chung</div>
-              <div class="col-date" style="color:#F4A261">Apr 14</div>
-              <div class="col-status"><span class="badge" style="background:rgba(1,186,239,0.15);color:#01BAEF">in_progress</span></div>
+              <div class="col-owner">Ivy Chung</div>
+              <div class="col-date" style="color:#F59E0B">Apr 14</div>
+              <div class="col-status"><span class="badge" style="background:rgba(6,182,212,0.12);color:#06B6D4;border-color:rgba(6,182,212,0.25)">In Progress</span></div>
             </div>
             <div class="table-row">
               <div class="col-task">MEP loads</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Anika Chen</div>
+              <div class="col-owner">Anika Chen</div>
               <div class="col-date">Apr 05</div>
-              <div class="col-status"><span class="badge" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)">not_started</span></div>
+              <div class="col-status"><span class="badge" style="background:rgba(139,92,246,0.12);color:#8B5CF6;border-color:rgba(139,92,246,0.25)">Not Started</span></div>
             </div>
             <div class="table-row" style="opacity:0.45">
               <div class="col-task">Cost plan</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Lina Tan</div>
+              <div class="col-owner">Lina Tan</div>
               <div class="col-date">Apr 05</div>
-              <div class="col-status"><span class="badge" style="background:rgba(32,191,85,0.15);color:#20BF55">done</span></div>
+              <div class="col-status"><span class="badge" style="background:rgba(16,185,129,0.12);color:#10B981;border-color:rgba(16,185,129,0.25)">Done</span></div>
             </div>
           </div>
 
           <!-- status chips legend -->
           <div class="chips">
-            <span class="chip" style="background:rgba(251,54,64,0.2);color:#FB3640">● blocked</span>
-            <span class="chip" style="background:rgba(1,186,239,0.15);color:#01BAEF">● in_progress</span>
-            <span class="chip" style="background:rgba(244,162,97,0.2);color:#F4A261">● due soon</span>
-            <span class="chip" style="background:rgba(32,191,85,0.15);color:#20BF55">● done</span>
+            <span class="chip" style="background:rgba(239,68,68,0.12);color:#EF4444;border-color:rgba(239,68,68,0.25)">● Blocked</span>
+            <span class="chip" style="background:rgba(6,182,212,0.12);color:#06B6D4;border-color:rgba(6,182,212,0.25)">● In Progress</span>
+            <span class="chip" style="background:rgba(245,158,11,0.12);color:#F59E0B;border-color:rgba(245,158,11,0.25)">● Due Soon</span>
+            <span class="chip" style="background:rgba(16,185,129,0.12);color:#10B981;border-color:rgba(16,185,129,0.25)">● Done</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ========== PALETTE B ========== -->
+  <!-- ========== COLOR PALETTE ========== -->
   <div>
-    <div class="label">Option B — Sunrise Gradient</div>
-    <div class="palette b-bg" style="border: 1px solid #9B5DE533;">
-
-      <!-- header bar -->
-      <div class="header b-pri">
-        <div class="dot b-acc"></div>
-        <div>
-          <h2>SJ Project Planner Agent</h2>
-          <div class="sub">Harbour Bridge Expansion · 52 tasks</div>
-        </div>
+    <div class="label">Color Tokens</div>
+    <div class="palette ds-bg" style="padding:20px;">
+      <div style="font-size:13px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px;">Backgrounds</div>
+      <div class="color-grid">
+        <div class="color-swatch" style="background:#0B0F19;color:#6B7280;">Bg<br>#0B0F19</div>
+        <div class="color-swatch" style="background:#111827;color:#6B7280;">Surface<br>#111827</div>
+        <div class="color-swatch" style="background:#1F2937;">Surface Hi<br>#1F2937</div>
+        <div class="color-swatch" style="background:#374151;">Border<br>#374151</div>
       </div>
 
-      <div class="sidebar-main">
-        <!-- sidebar -->
-        <div class="sidebar b-surf">
-          <div class="nav-item active" style="background:#3D155F;color:#9B5DE5">📥 Inbox</div>
-          <div class="nav-item">📋 Drafts</div>
-          <div class="nav-item">📊 Tracker</div>
-          <div class="nav-item">📅 Gantt</div>
-          <div class="nav-item">🕓 Change Log</div>
-          <div style="flex:1"></div>
-          <div style="padding:8px;font-size:11px;color:rgba(255,255,255,0.35)">
-            Postgres ✅<br>LLM ✅
-          </div>
-        </div>
+      <div style="font-size:13px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 12px;">Semantic Colors</div>
+      <div class="color-grid">
+        <div class="color-swatch" style="background:#06B6D4;">Primary<br>#06B6D4</div>
+        <div class="color-swatch" style="background:#8B5CF6;">Accent<br>#8B5CF6</div>
+        <div class="color-swatch" style="background:#10B981;">Success<br>#10B981</div>
+        <div class="color-swatch" style="background:#F59E0B;">Warning<br>#F59E0B</div>
+      </div>
+      <div class="color-grid" style="grid-template-columns: repeat(2, 1fr); margin-top:8px;">
+        <div class="color-swatch" style="background:#EF4444;">Error<br>#EF4444</div>
+        <div class="color-swatch" style="background:#F9FAFB;color:#374151;">Text<br>#F9FAFB</div>
+      </div>
 
-        <!-- main content -->
-        <div class="main b-bg">
-          <div class="page-title">Tracker</div>
-          <div class="page-sub">Current state of the plan. Updated when drafts are approved.</div>
-
-          <!-- metrics -->
-          <div class="metrics">
-            <div class="metric b-surf">
-              <div class="val" style="color:#9B5DE5">52</div>
-              <div class="lbl">Total Tasks</div>
-            </div>
-            <div class="metric b-surf">
-              <div class="val" style="color:#F15BB5">8</div>
-              <div class="lbl">Overdue</div>
-            </div>
-            <div class="metric b-surf">
-              <div class="val" style="color:#FEE440">3</div>
-              <div class="lbl">Pending Drafts</div>
-            </div>
-            <div class="metric b-surf">
-              <div class="val" style="color:#00BBF9">12</div>
-              <div class="lbl">Applied This Week</div>
-            </div>
-          </div>
-
-          <!-- table -->
-          <div class="table-wrap b-surf">
-            <div class="table-head">
-              <div class="col-task">Task</div>
-              <div class="col-owner">Owner</div>
-              <div class="col-date">Due</div>
-              <div class="col-status">Status</div>
-            </div>
-            <div class="table-row" style="background:rgba(241,91,181,0.1)">
-              <div class="col-task">Riser strategy</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Rina Ali</div>
-              <div class="col-date" style="color:#F15BB5">Mar 29</div>
-              <div class="col-status"><span class="badge" style="background:rgba(241,91,181,0.2);color:#F15BB5">blocked</span></div>
-            </div>
-            <div class="table-row" style="background:rgba(155,93,229,0.08)">
-              <div class="col-task">4D link check</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Ivy Chung</div>
-              <div class="col-date" style="color:#FEE440">Apr 14</div>
-              <div class="col-status"><span class="badge" style="background:rgba(0,187,249,0.15);color:#00BBF9">in_progress</span></div>
-            </div>
-            <div class="table-row">
-              <div class="col-task">MEP loads</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Anika Chen</div>
-              <div class="col-date">Apr 05</div>
-              <div class="col-status"><span class="badge" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)">not_started</span></div>
-            </div>
-            <div class="table-row" style="opacity:0.45">
-              <div class="col-task">Cost plan</div>
-              <div class="col-owner" style="color:rgba(255,255,255,0.5)">Lina Tan</div>
-              <div class="col-date">Apr 05</div>
-              <div class="col-status"><span class="badge" style="background:rgba(0,187,249,0.15);color:#00BBF9">done</span></div>
-            </div>
-          </div>
-
-          <!-- status chips legend -->
-          <div class="chips">
-            <span class="chip" style="background:rgba(241,91,181,0.2);color:#F15BB5">● blocked</span>
-            <span class="chip" style="background:rgba(0,187,249,0.15);color:#00BBF9">● in_progress</span>
-            <span class="chip" style="background:rgba(254,228,64,0.2);color:#FEE440">● due soon</span>
-            <span class="chip" style="background:rgba(155,93,229,0.2);color:#9B5DE5">● done</span>
-          </div>
-        </div>
+      <div style="font-size:13px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.08em;margin:20px 0 12px;">Status Colors</div>
+      <div class="color-grid">
+        <div class="color-swatch" style="background:#8B5CF6;">Not Started<br>#8B5CF6</div>
+        <div class="color-swatch" style="background:#06B6D4;">In Progress<br>#06B6D4</div>
+        <div class="color-swatch" style="background:#EF4444;">Blocked<br>#EF4444</div>
+        <div class="color-swatch" style="background:#10B981;">Done<br>#10B981</div>
       </div>
     </div>
   </div>
 
 </div>
 
-<p style="text-align:center;margin-top:28px;color:rgba(255,255,255,0.3);font-size:12px">
-  Open this file in your browser · D:\CWB\docs\palette-preview.html
+<p style="text-align:center;margin-top:32px;color:#374151;font-size:12px">
+  SJ Project Planner — Microsoft Code Without Barriers Hackathon 2026
 </p>
 </body>
 </html>

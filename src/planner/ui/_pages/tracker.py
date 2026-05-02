@@ -14,10 +14,10 @@ from planner.db import session_scope
 from planner.repositories import change_log_repo, tasks_repo
 
 _STATUS_BG = {
-    "not_started": ("rgba(155,93,229,0.15)", "#9B5DE5"),
-    "in_progress":  ("rgba(0,187,249,0.18)",  "#00BBF9"),
-    "blocked":      ("rgba(241,91,181,0.22)",  "#F15BB5"),
-    "done":         ("rgba(155,93,229,0.08)",  "rgba(155,93,229,0.55)"),
+    "not_started": ("rgba(100,116,139,0.15)", "#64748B"),
+    "in_progress":  ("rgba(37,99,235,0.15)",  "#2563EB"),
+    "blocked":      ("rgba(248,113,113,0.15)",  "#F87171"),
+    "done":         ("rgba(45,212,191,0.12)",  "#2DD4BF"),
 }
 
 _PRIORITY_ICON = {"high": "🔴", "medium": "🟡", "med": "🟡", "low": "🟢"}
