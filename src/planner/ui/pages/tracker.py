@@ -66,11 +66,15 @@ def render() -> None:
         filtered = filtered[filtered["status"] != "done"]
 
     def _row_style(row):
-        if row["overdue"]:
+        today = date.today()
+        due = row.get("due_date")
+        is_overdue = bool(due and due < today)
+        is_due_soon = bool(due and today <= due <= today + timedelta(days=3))
+        if is_overdue:
             return ["background-color: #ffebee"] * len(row)
-        if row["due_soon"]:
+        if is_due_soon:
             return ["background-color: #fff3e0"] * len(row)
-        if row["status"] == "done":
+        if row.get("status") == "done":
             return ["color: #999"] * len(row)
         return [""] * len(row)
 
