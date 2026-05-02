@@ -46,20 +46,25 @@ def render() -> None:
         return
 
     attendees = [a.strip() for a in attendees_raw.split(",") if a.strip()]
+    service = PlannerService()
 
-    with st.spinner("Running the agent pipeline…"):
-        service = PlannerService()
+    with st.status("Running agent pipeline…", expanded=True) as status:
+        st.write("Saving note to database…")
         note = service.ingest_note(
             text=text, source=source, title=title.strip(),
             meeting_date=meeting_date, attendees=attendees,
         )
+        st.write(f"Note saved · extracting tasks from {len(text)} characters…")
         try:
             draft = service.run_pipeline(note_id=note.id)
         except Exception as exc:
+            status.update(label="Pipeline failed", state="error")
             st.error(f"Pipeline failed: {exc}")
             return
+        n = len(draft.proposed_changes)
+        st.write(f"Classified {n} change(s) · draft ready for review.")
+        status.update(label=f"Done — {n} proposed change(s)", state="complete")
 
-    st.success(f"Draft created — {len(draft.proposed_changes)} proposed change(s).")
     st.session_state["last_draft_id"] = str(draft.id)
     st.markdown(f"**Summary:** {draft.summary_md}")
-    st.info("Open the **Drafts** page in the sidebar to review and approve.")
+    st.info("Open **Drafts** in the sidebar to review and approve.")

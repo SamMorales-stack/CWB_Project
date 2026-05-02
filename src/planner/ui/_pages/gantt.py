@@ -45,19 +45,25 @@ def render() -> None:
         df, x_start="Start", x_end="Finish", y="title", color="status",
         hover_data=["owner"],
         color_discrete_map={
-            "not_started": "#90caf9",
-            "in_progress": "#42a5f5",
-            "blocked": "#ef5350",
-            "done": "#a5d6a7",
+            "not_started": "#9B5DE5",
+            "in_progress": "#00BBF9",
+            "blocked": "#F15BB5",
+            "done": "#3D155F",
         },
         labels={"title": "Task"},
     )
     fig.update_yaxes(autorange="reversed")
+    fig.update_layout(
+        paper_bgcolor="#1A1A2E",
+        plot_bgcolor="#16213E",
+        font_color="#E8EAF0",
+    )
     fig.add_vline(
         x=pd.Timestamp(date.today()),
         line_dash="dash",
-        line_color="black",
+        line_color="#FEE440",
         annotation_text="today",
         annotation_position="top right",
+        annotation_font_color="#FEE440",
     )
     st.plotly_chart(fig, use_container_width=True)
