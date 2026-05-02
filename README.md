@@ -8,7 +8,7 @@
 
 ## Live Demo
 
-🔗 **[Live URL — to be added after deployment]**
+🔗 **https://sjplanner-sm2026.calmbush-865eff5f.eastasia.azurecontainerapps.io/**
 
 ## Pitch Video
 

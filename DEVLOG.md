@@ -12,7 +12,7 @@
 
 A full-stack agentic AI assistant that converts unstructured meeting notes, emails, and project conversations into structured, auditable plan updates — with a human-in-the-loop approval workflow at its core.
 
-**Live demo:** _see README.md_
+**Live demo:** https://sjplanner-sm2026.calmbush-865eff5f.eastasia.azurecontainerapps.io/
 **GitHub:** https://github.com/SamMorales-stack/CWB_Project
 
 ---
