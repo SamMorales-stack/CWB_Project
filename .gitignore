@@ -26,6 +26,7 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+mintty.*.png
 
 # Local data
 *.sqlite
