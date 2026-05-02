@@ -1,4 +1,4 @@
-"""Groq client wrapper using Groq's OpenAI-compatible endpoint (free tier)."""
+"""Gemini client wrapper using Google AI Studio's OpenAI-compatible endpoint."""
 from __future__ import annotations
 
 import json
@@ -13,11 +13,11 @@ from planner.config import get_settings
 @lru_cache(maxsize=1)
 def get_client() -> OpenAI:
     s = get_settings()
-    # Groq's OpenAI-compatible endpoint — free tier, no credit card required.
+    # Google AI Studio's OpenAI-compatible endpoint.
     # max_retries=3 gives automatic exponential backoff on rate-limit and transient errors.
     return OpenAI(
-        api_key=s.groq_api_key,
-        base_url="https://api.groq.com/openai/v1",
+        api_key=s.google_api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
         max_retries=3,
     )
 
@@ -30,7 +30,9 @@ def structured_completion[T: BaseModel](
     schema_model: type[T],
     temperature: float = 0.1,
 ) -> T:
-    """Call Groq (Llama) via OpenAI-compatible endpoint, parse into the given Pydantic model.
+    """Call Gemini via Google AI Studio's OpenAI-compatible endpoint.
+
+    Parses the response into the given Pydantic model.
 
     Retries once with a stricter prompt on validation failure.
     """

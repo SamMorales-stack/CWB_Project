@@ -8,9 +8,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str
-    groq_api_key: str
-    azure_openai_deployment_main: str = "llama-3.3-70b-versatile"
-    azure_openai_deployment_fast: str = "llama-3.3-70b-versatile"
+    google_api_key: str
+    azure_openai_deployment_main: str = "gemini-3.1-flash-lite-preview"
+    azure_openai_deployment_fast: str = "gemini-3.1-flash-lite-preview"
     app_name: str = "SJ Project Planner Agent"
     log_level: str = "INFO"
 
