@@ -1,4 +1,4 @@
-"""Gemini client wrapper using Google AI Studio's OpenAI-compatible endpoint."""
+"""OpenCode Go client wrapper (opencode.ai/zen/go/v1 — OpenAI-compatible)."""
 from __future__ import annotations
 
 import json
@@ -13,11 +13,10 @@ from planner.config import get_settings
 @lru_cache(maxsize=1)
 def get_client() -> OpenAI:
     s = get_settings()
-    # Google AI Studio's OpenAI-compatible endpoint.
-    # max_retries=3 gives automatic exponential backoff on rate-limit and transient errors.
+    # OpenCode Go — OpenAI-compatible endpoint. max_retries=3 for backoff on rate-limits.
     return OpenAI(
-        api_key=s.google_api_key,
-        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        api_key=s.opencode_api_key,
+        base_url="https://opencode.ai/zen/go/v1/",
         max_retries=3,
     )
 
