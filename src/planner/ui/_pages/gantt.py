@@ -9,7 +9,7 @@ import streamlit as st
 
 from planner.db import session_scope
 from planner.repositories import tasks_repo
-from planner.ui.styles import COLORS, ICONS, empty_state, section_header
+from planner.ui.styles import COLORS, ICONS, empty_state
 
 
 def render() -> None:

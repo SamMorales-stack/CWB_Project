@@ -11,12 +11,10 @@ from planner.service import PlannerService
 from planner.ui.styles import (
     COLORS,
     ICONS,
-    card,
     confidence_badge,
     empty_state,
     op_badge,
     section_header,
-    status_badge,
 )
 
 _HIGH_CONFIDENCE = 0.8

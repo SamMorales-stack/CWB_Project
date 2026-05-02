@@ -1,7 +1,6 @@
 """Change Log page: audit trail with diff view and weekly digest."""
 from __future__ import annotations
 
-import pandas as pd
 import streamlit as st
 
 from planner.db import session_scope
@@ -11,7 +10,6 @@ from planner.ui.styles import (
     COLORS,
     ICONS,
     empty_state,
-    op_badge,
     section_header,
     timeline_item,
 )
