@@ -106,16 +106,20 @@ def render() -> None:
         ),
     )
 
-    # Today's line
-    fig.add_vline(
-        x=date.today().isoformat(),
-        line_dash="dash",
-        line_color=COLORS["warning"],
-        line_width=2,
-        annotation_text="Today",
-        annotation_position="top right",
-        annotation_font_color=COLORS["warning"],
-        annotation_font_size=12,
+    # Today's line — add_vline annotation causes pandas 3.x TypeError,
+    # so use add_shape + add_annotation directly.
+    today_str = date.today().isoformat()
+    fig.add_shape(
+        type="line",
+        x0=today_str, x1=today_str,
+        y0=0, y1=1, yref="paper",
+        line=dict(dash="dash", color=COLORS["warning"], width=2),
+    )
+    fig.add_annotation(
+        x=today_str, y=1.02, yref="paper",
+        text="Today", showarrow=False,
+        font=dict(color=COLORS["warning"], size=12),
+        xanchor="left",
     )
 
     # Bars styling
