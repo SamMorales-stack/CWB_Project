@@ -4,8 +4,7 @@
 # Required environment variables (set before running):
 #   APP_NAME            unique short name, e.g. sjplanner-sm7k3x
 #   LOCATION            Azure region, e.g. eastasia  (match your subscription's allowed regions)
-#   AOAI_ENDPOINT       https://<resource>.openai.azure.com/
-#   AOAI_KEY            Azure OpenAI API key
+#   GOOGLE_API_KEY      Gemini API key from aistudio.google.com (free, no credit card)
 #   PG_ADMIN_PASSWORD   Postgres admin password (16+ chars, mixed case + digit + symbol)
 #
 # Usage: export the vars above, then run ./infra/deploy.sh
@@ -15,8 +14,7 @@ set -euo pipefail
 
 : "${APP_NAME:?must set APP_NAME}"
 : "${LOCATION:?must set LOCATION}"
-: "${AOAI_ENDPOINT:?must set AOAI_ENDPOINT}"
-: "${AOAI_KEY:?must set AOAI_KEY}"
+: "${GOOGLE_API_KEY:?must set GOOGLE_API_KEY}"
 : "${PG_ADMIN_PASSWORD:?must set PG_ADMIN_PASSWORD}"
 
 RG="${APP_NAME}-rg"
@@ -98,14 +96,12 @@ else
         --ingress external \
         --min-replicas 1 \
         --max-replicas 1 \
-        --secrets "pg-url=$DATABASE_URL" "aoai-key=$AOAI_KEY" \
+        --secrets "pg-url=$DATABASE_URL" "gemini-key=$GOOGLE_API_KEY" \
         --env-vars \
             "DATABASE_URL=secretref:pg-url" \
-            "AZURE_OPENAI_ENDPOINT=$AOAI_ENDPOINT" \
-            "AZURE_OPENAI_API_KEY=secretref:aoai-key" \
-            "AZURE_OPENAI_API_VERSION=2024-08-01-preview" \
-            "AZURE_OPENAI_DEPLOYMENT_MAIN=gpt-4o" \
-            "AZURE_OPENAI_DEPLOYMENT_FAST=gpt-4o-mini" \
+            "GOOGLE_API_KEY=secretref:gemini-key" \
+            "AZURE_OPENAI_DEPLOYMENT_MAIN=gemini-2.0-flash" \
+            "AZURE_OPENAI_DEPLOYMENT_FAST=gemini-2.0-flash" \
         --output none
 fi
 

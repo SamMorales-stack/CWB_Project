@@ -1,4 +1,4 @@
-"""OpenAI client wrapper with structured-output helpers."""
+"""Gemini client wrapper using Google AI Studio's OpenAI-compatible endpoint."""
 from __future__ import annotations
 
 import json
@@ -13,8 +13,13 @@ from planner.config import get_settings
 @lru_cache(maxsize=1)
 def get_client() -> OpenAI:
     s = get_settings()
+    # Google AI Studio's OpenAI-compatible endpoint — free tier, no credit card required.
     # max_retries=3 gives automatic exponential backoff on rate-limit and transient errors.
-    return OpenAI(api_key=s.openai_api_key, max_retries=3)
+    return OpenAI(
+        api_key=s.google_api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+        max_retries=3,
+    )
 
 
 def structured_completion[T: BaseModel](
@@ -25,7 +30,7 @@ def structured_completion[T: BaseModel](
     schema_model: type[T],
     temperature: float = 0.1,
 ) -> T:
-    """Call OpenAI with JSON-mode and parse into the given Pydantic model.
+    """Call Gemini via OpenAI-compatible endpoint, parse into the given Pydantic model.
 
     Retries once with a stricter prompt on validation failure.
     """

@@ -8,9 +8,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str
-    openai_api_key: str
-    azure_openai_deployment_main: str = "gpt-4o"
-    azure_openai_deployment_fast: str = "gpt-4o-mini"
+    google_api_key: str
+    azure_openai_deployment_main: str = "gemini-2.0-flash"
+    azure_openai_deployment_fast: str = "gemini-2.0-flash"
     app_name: str = "SJ Project Planner Agent"
     log_level: str = "INFO"
 

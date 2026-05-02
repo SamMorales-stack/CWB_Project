@@ -24,7 +24,7 @@ jobs:
           --health-retries 5
     env:
       DATABASE_URL: postgresql+psycopg://planner:planner@localhost:5432/planner
-      OPENAI_API_KEY: placeholder
+      GOOGLE_API_KEY: placeholder
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
