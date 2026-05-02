@@ -52,15 +52,15 @@ def main() -> None:
         n.success(f"Loaded {count} note(s).")
 
     if page == "Inbox":
-        from planner.ui.pages.inbox import render
+        from planner.ui._pages.inbox import render
     elif page == "Drafts":
-        from planner.ui.pages.drafts import render
+        from planner.ui._pages.drafts import render
     elif page == "Tracker":
-        from planner.ui.pages.tracker import render
+        from planner.ui._pages.tracker import render
     elif page == "Gantt":
-        from planner.ui.pages.gantt import render
+        from planner.ui._pages.gantt import render
     else:
-        from planner.ui.pages.change_log import render
+        from planner.ui._pages.change_log import render
 
     render()
 
