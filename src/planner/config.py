@@ -8,9 +8,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str
-    azure_openai_endpoint: str
-    azure_openai_api_key: str
-    azure_openai_api_version: str = "2024-08-01-preview"
+    openai_api_key: str
     azure_openai_deployment_main: str = "gpt-4o"
     azure_openai_deployment_fast: str = "gpt-4o-mini"
     app_name: str = "SJ Project Planner Agent"

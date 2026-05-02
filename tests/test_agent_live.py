@@ -64,7 +64,6 @@ def test_classify_change_detects_update(db_not_needed=None):
     from planner.agent import tools
     from planner.agent.schemas import CandidateMatch, ExtractedItem
 
-    agent = PlannerAgent()
     item = ExtractedItem(
         title="Postgres migration",
         owner="Priya",

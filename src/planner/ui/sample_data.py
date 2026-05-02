@@ -41,9 +41,6 @@ def _fetch(url: str) -> str:
 
 def load_samples() -> int:
     """Load CWB_SJ dataset. Returns number of meeting notes ingested."""
-    with session_scope() as s:
-        already_loaded = len(tasks_repo.list_all(s)) > 0
-
     _load_baseline_tasks()
     count = _load_meeting_notes()
     count += _load_emails()
@@ -78,7 +75,7 @@ def _load_baseline_tasks() -> None:
 
 def _load_meeting_notes() -> int:
     raw = _fetch(f"{_BASE}/meeting_notes.jsonl")
-    lines = [l for l in raw.splitlines() if l.strip()][:_MAX_NOTES]
+    lines = [ln for ln in raw.splitlines() if ln.strip()][:_MAX_NOTES]
     count = 0
     with session_scope() as s:
         for line in lines:

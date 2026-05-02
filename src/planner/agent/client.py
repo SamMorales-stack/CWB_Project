@@ -1,26 +1,20 @@
-"""Azure OpenAI client wrapper with structured-output helpers."""
+"""OpenAI client wrapper with structured-output helpers."""
 from __future__ import annotations
 
 import json
 from functools import lru_cache
 
-from openai import AzureOpenAI
+from openai import OpenAI
 from pydantic import BaseModel
 
 from planner.config import get_settings
 
 
 @lru_cache(maxsize=1)
-def get_client() -> AzureOpenAI:
+def get_client() -> OpenAI:
     s = get_settings()
-    # max_retries=3 gives us automatic exponential backoff on rate-limit
-    # and transient errors (per design spec Section 6.1).
-    return AzureOpenAI(
-        api_key=s.azure_openai_api_key,
-        api_version=s.azure_openai_api_version,
-        azure_endpoint=s.azure_openai_endpoint,
-        max_retries=3,
-    )
+    # max_retries=3 gives automatic exponential backoff on rate-limit and transient errors.
+    return OpenAI(api_key=s.openai_api_key, max_retries=3)
 
 
 def structured_completion[T: BaseModel](
@@ -31,7 +25,7 @@ def structured_completion[T: BaseModel](
     schema_model: type[T],
     temperature: float = 0.1,
 ) -> T:
-    """Call Azure OpenAI with JSON-mode and parse into the given Pydantic model.
+    """Call OpenAI with JSON-mode and parse into the given Pydantic model.
 
     Retries once with a stricter prompt on validation failure.
     """
