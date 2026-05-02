@@ -149,12 +149,20 @@ def render() -> None:
         marker_line_width=0,
         opacity=1.0,
         hovertemplate=(
-            "<b>%{y}</b><br>"
-            "Owner: %{customdata[0]}<br>"
-            "Priority: %{customdata[1]}<br>"
-            "Start: %{base|%b %d, %Y}<br>"
-            "Due: %{x|%b %d, %Y}<br>"
+            "<b style='font-size:14px'>%{y}</b><br><br>"
+            "👤  <b>Owner:</b> %{customdata[0]}<br>"
+            "🚦  <b>Priority:</b> %{customdata[1]}<br>"
+            "📅  <b>Start:</b> %{base|%b %d, %Y}<br>"
+            "⏰  <b>Due:</b> %{x|%b %d, %Y}<br>"
             "<extra></extra>"
+        ),
+    )
+    fig.update_layout(
+        hoverlabel=dict(
+            bgcolor="#1E293B",
+            bordercolor="#475569",
+            font=dict(size=14, color="white", family="Inter, sans-serif"),
+            namelength=-1,
         ),
     )
 
