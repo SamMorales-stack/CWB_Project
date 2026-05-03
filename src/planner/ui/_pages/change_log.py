@@ -157,16 +157,34 @@ def render() -> None:
         )
 
 
+_STATUS_LABELS = {
+    "not_started": "Not Started",
+    "in_progress": "In Progress",
+    "blocked":     "On Hold",
+    "done":        "Done",
+}
+
+
+def _fmt_val(key: str, val: object) -> str:
+    if key == "status" and isinstance(val, str):
+        return _STATUS_LABELS.get(val, val)
+    return str(val) if val is not None else "—"
+
+
 def _format_diff(before: dict | None, after: dict | None) -> str:
     if before is None and after is not None:
-        return "+ " + ", ".join(f"{k}={v!r}" for k, v in after.items() if v is not None)
+        return "+ " + ", ".join(
+            f"{k}={_fmt_val(k, v)}" for k, v in after.items() if v is not None
+        )
     if after is None and before is not None:
-        return "- " + ", ".join(f"{k}={v!r}" for k, v in before.items() if v is not None)
+        return "- " + ", ".join(
+            f"{k}={_fmt_val(k, v)}" for k, v in before.items() if v is not None
+        )
     if before is None or after is None:
         return ""
     parts = []
     for k in sorted(set(before) | set(after)):
         b, a = before.get(k), after.get(k)
         if b != a:
-            parts.append(f"{k}: {b!r} → {a!r}")
+            parts.append(f"{k}: {_fmt_val(k, b)} → {_fmt_val(k, a)}")
     return "; ".join(parts)

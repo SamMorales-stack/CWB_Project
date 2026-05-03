@@ -13,11 +13,18 @@ from rapidfuzz import fuzz, process
 from planner.db import session_scope
 from planner.repositories import change_log_repo, tasks_repo
 
+_STATUS_LABELS = {
+    "not_started": "Not Started",
+    "in_progress": "In Progress",
+    "blocked":     "On Hold",
+    "done":        "Done",
+}
+
 _STATUS_BG = {
-    "not_started": ("rgba(100,116,139,0.15)", "#64748B"),
-    "in_progress":  ("rgba(37,99,235,0.15)",  "#2563EB"),
-    "blocked":      ("rgba(248,113,113,0.15)",  "#F87171"),
-    "done":         ("rgba(45,212,191,0.12)",  "#2DD4BF"),
+    "Not Started": ("rgba(100,116,139,0.15)", "#64748B"),
+    "In Progress":  ("rgba(37,99,235,0.15)",  "#2563EB"),
+    "On Hold":      ("rgba(248,113,113,0.15)", "#F87171"),
+    "Done":         ("rgba(45,212,191,0.12)",  "#2DD4BF"),
 }
 
 _PRIORITY_ICON = {"high": "🔴", "medium": "🟡", "med": "🟡", "low": "🟢"}
@@ -119,17 +126,20 @@ def render() -> None:
         urgent = df[df["overdue"] | ((df["priority"] == "high") & (df["status"] != "done"))]
         if not urgent.empty:
             st.subheader("Urgent")
+            u_display = urgent[["title", "owner", "due_date", "status", "priority"]].copy()
+            u_display["status"] = u_display["status"].map(_STATUS_LABELS)
             st.dataframe(
-                urgent[["title", "owner", "due_date", "status", "priority"]].style.map(
-                    _status_cell, subset=["status"]
-                ),
+                u_display.style.map(_status_cell, subset=["status"]),
                 hide_index=True,
                 use_container_width=True,
             )
 
         st.subheader("All tasks")
         col1, col2, col3 = st.columns(3)
-        status_filter = col1.multiselect("Status", sorted(df["status"].unique()))
+        status_filter = col1.multiselect(
+            "Status", sorted(df["status"].unique()),
+            format_func=lambda s: _STATUS_LABELS.get(s, s),
+        )
         owner_filter = col2.multiselect("Owner", sorted(o for o in df["owner"].unique() if o))
         only_open = col3.checkbox("Hide done", value=True)
 
@@ -143,6 +153,7 @@ def render() -> None:
 
         filtered = filtered.copy()
         filtered["priority"] = filtered["priority"].map(lambda p: _PRIORITY_ICON.get(p, p))
+        filtered["status"] = filtered["status"].map(_STATUS_LABELS)
 
         def _row_style(row):
             due = row.get("due_date")
@@ -152,7 +163,7 @@ def render() -> None:
                 return ["background-color: rgba(241,91,181,0.12)"] * len(row)
             if is_due_soon:
                 return ["background-color: rgba(254,228,64,0.08)"] * len(row)
-            if row.get("status") == "done":
+            if row.get("status") == "Done":
                 return ["opacity: 0.45"] * len(row)
             return [""] * len(row)
 
@@ -213,9 +224,10 @@ def render() -> None:
                                 for k in sorted(set(b) | set(a)):
                                     bv, av = b.get(k), a.get(k)
                                     if bv != av:
-                                        diffs.append(
-                                            f"**{k}:** `{bv}` → `{av}`"
-                                        )
+                                        if k == "status":
+                                            bv = _STATUS_LABELS.get(bv, bv)
+                                            av = _STATUS_LABELS.get(av, av)
+                                        diffs.append(f"**{k}:** `{bv}` → `{av}`")
                                 if diffs:
                                     st.markdown("\n\n".join(diffs))
                             if h["evidence"]:
@@ -238,7 +250,6 @@ def render() -> None:
             return
 
         current = {r["title"]: r for r in rows}
-        baseline_titles = [b["title"] for b in baseline]
         diffs = []
 
         for b in baseline:
@@ -265,7 +276,9 @@ def render() -> None:
                     sign = "+" if cur["due_date"] > b["due_date"] else "-"
                     changes.append(f"due: {b['due_date']} → {cur['due_date']} ({sign}{delta}d)")
             if b["status"] != cur["status"]:
-                changes.append(f"status: {b['status']} → {cur['status']}")
+                b_lbl = _STATUS_LABELS.get(b["status"], b["status"])
+                c_lbl = _STATUS_LABELS.get(cur["status"], cur["status"])
+                changes.append(f"status: {b_lbl} → {c_lbl}")
 
             if changes:
                 diffs.append({
