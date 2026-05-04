@@ -124,12 +124,21 @@ def main() -> None:
         # Navigation
         st.markdown(
             f'<div style="font-size:10px;font-weight:700;color:{COLORS["text_muted"]};'
-            f'text-transform:uppercase;letter-spacing:0.08em;margin:12px 0 8px 4px;">Navigation</div>',
+            f'text-transform:uppercase;letter-spacing:0.08em;margin:12px 0 6px 4px;">Navigation</div>',
             unsafe_allow_html=True,
         )
+        _nav_icons = {
+            "Inbox":      "⊞",
+            "Drafts":     "⊡",
+            "Tracker":    "☑",
+            "Gantt":      "⊕",
+            "Change Log": "⊙",
+            "Replay":     "↺",
+        }
         page = st.radio(
             "Navigate",
             ["Inbox", "Drafts", "Tracker", "Gantt", "Change Log", "Replay"],
+            format_func=lambda p: f"{_nav_icons.get(p, '○')}  {p}",
             label_visibility="collapsed",
         )
 

@@ -132,25 +132,43 @@ def inject_global_css() -> None:
         background: {COLORS["surface"]} !important;
         border-right: 1px solid {COLORS["border"]} !important;
     }}
-    [data-testid="stSidebar"] .stRadio > div {{
-        display: flex; flex-direction: column; gap: 4px;
+
+    /* ── Sidebar nav: hide radio circles, style as button list ── */
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
+        display: flex; flex-direction: column; gap: 2px;
     }}
-    [data-testid="stSidebar"] .stRadio label {{
-        background: transparent; border-radius: 8px;
-        padding: 8px 12px; margin: 0;
-        transition: all 0.15s ease;
+    /* Hide the radio circle dot / SVG / input */
+    [data-testid="stSidebar"] .stRadio label > div:first-child,
+    [data-testid="stSidebar"] .stRadio label [data-baseweb="radio"],
+    [data-testid="stSidebar"] .stRadio label input[type="radio"] {{
+        display: none !important;
+    }}
+    /* Base style for all nav items */
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {{
+        display: flex !important;
+        align-items: center !important;
+        padding: 9px 12px !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
         color: {COLORS["text_secondary"]} !important;
-        font-weight: 500; font-size: 14px;
+        font-weight: 500 !important;
+        font-size: 14px !important;
+        border-left: 3px solid transparent !important;
+        margin: 1px 0 !important;
+        transition: background 0.12s ease, color 0.12s ease !important;
+        background: transparent !important;
     }}
-    [data-testid="stSidebar"] .stRadio label:hover {{
-        background: {COLORS["surface_hi"]};
+    /* Hover state */
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
+        background: {COLORS["surface_hi"]} !important;
         color: {COLORS["text"]} !important;
     }}
-    [data-testid="stSidebar"] .stRadio [aria-checked="true"] + label {{
+    /* Active / selected state */
+    [data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:has(input:checked) {{
         background: {COLORS["surface_hi"]} !important;
         color: {COLORS["primary"]} !important;
-        font-weight: 600;
-        border-left: 3px solid {COLORS["primary"]};
+        font-weight: 600 !important;
+        border-left-color: {COLORS["primary"]} !important;
     }}
 
     .stButton > button {{
