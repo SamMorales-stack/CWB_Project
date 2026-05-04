@@ -121,15 +121,21 @@ def render() -> None:
             meeting_date=meeting_date,
             attendees=attendees,
         )
-        st.write(f"Note saved · extracting tasks from {len(text):,} characters…")
         try:
-            draft = service.run_pipeline(note_id=note.id)
+            st.write(f"Step 1/3 — Extracting tasks from {len(text):,} characters…")
+            note_view = service.get_note(note_id=note.id)
+            items = service.extract_items(note=note_view)
+            n_items = len(items)
+            st.write(f"Step 2/3 — Classifying {n_items} item(s)…")
+            changes = service.classify_items(note_id=note.id, items=items)
+            st.write(f"Step 3/3 — Generating draft summary…")
+            draft = service.finalize_draft(note_id=note.id, changes=changes)
         except Exception as exc:
             status.update(label="Pipeline failed", state="error")
             st.error(f"Pipeline failed: {exc}")
             return
         n = len(draft.proposed_changes)
-        st.write(f"Classified {n} change(s) · draft ready for review.")
+        st.write(f"Draft ready — {n} proposed change(s).")
         status.update(label=f"Done — {n} proposed change(s)", state="complete")
 
     # ── Result card ───────────────────────────────────────────────────────────

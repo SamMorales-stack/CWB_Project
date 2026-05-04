@@ -13,11 +13,11 @@ from planner.config import get_settings
 @lru_cache(maxsize=1)
 def get_client() -> OpenAI:
     s = get_settings()
-    # OpenCode Go — OpenAI-compatible endpoint. max_retries=3 for backoff on rate-limits.
     return OpenAI(
         api_key=s.opencode_api_key,
         base_url="https://opencode.ai/zen/go/v1/",
-        max_retries=3,
+        max_retries=1,
+        timeout=60.0,
     )
 
 

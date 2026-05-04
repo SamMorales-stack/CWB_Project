@@ -75,22 +75,39 @@ class PlannerService:
                 ingested_at=note.ingested_at,
             )
 
-    def run_pipeline(self, *, note_id: uuid.UUID) -> _DraftView:
+    def get_note(self, *, note_id: uuid.UUID) -> _NoteView:
         with session_scope() as s:
             note = meeting_notes_repo.get(s, note_id)
             if note is None:
                 raise ValueError(f"meeting_note {note_id} not found")
-
-            items = self.agent.extract(
-                note_text=note.content,
+            return _NoteView(
+                id=note.id,
                 source=note.source,
-                meeting_date=note.meeting_date.isoformat() if note.meeting_date else "",
                 title=note.title,
+                content=note.content,
+                meeting_date=note.meeting_date,
+                attendees=list(note.attendees),
+                ingested_at=note.ingested_at,
             )
 
-            changes: list[ProposedChange] = self.agent.classify_all(s, items=items)
-            summary: DraftSummary = self.agent.draft(changes=changes)
+    def extract_items(self, *, note: _NoteView) -> list:
+        """Step 1: extract task-shaped items from note text via LLM."""
+        return self.agent.extract(
+            note_text=note.content,
+            source=note.source,
+            meeting_date=note.meeting_date.isoformat() if note.meeting_date else "",
+            title=note.title,
+        )
 
+    def classify_items(self, *, note_id: uuid.UUID, items: list) -> list[ProposedChange]:
+        """Step 2: classify each item as create/update/conflict via LLM."""
+        with session_scope() as s:
+            return self.agent.classify_all(s, items=items)
+
+    def finalize_draft(self, *, note_id: uuid.UUID, changes: list[ProposedChange]) -> _DraftView:
+        """Step 3: generate summary and persist draft."""
+        summary: DraftSummary = self.agent.draft(changes=changes)
+        with session_scope() as s:
             draft = drafts_repo.create(
                 s,
                 proposed_changes=[c.model_dump(mode="json") for c in changes],
@@ -105,6 +122,12 @@ class PlannerService:
                 source_note_id=draft.source_note_id,
                 created_at=draft.created_at,
             )
+
+    def run_pipeline(self, *, note_id: uuid.UUID) -> _DraftView:
+        note = self.get_note(note_id=note_id)
+        items = self.extract_items(note=note)
+        changes = self.classify_items(note_id=note_id, items=items)
+        return self.finalize_draft(note_id=note_id, changes=changes)
 
     def apply_draft(
         self,
