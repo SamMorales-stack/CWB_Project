@@ -142,45 +142,53 @@ def main() -> None:
             label_visibility="collapsed",
         )
 
-        st.markdown("<div style='margin:16px 0;'></div>", unsafe_allow_html=True)
+        # ── Spacer pushes debug panel to bottom ──────────────────────────────
+        st.markdown("<div style='flex:1;min-height:40px;'></div>", unsafe_allow_html=True)
 
-        # Connection status
-        health = _check_health()
-        st.markdown(
-            f'<div style="font-size:10px;font-weight:700;color:{COLORS["text_muted"]};'
-            f'text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">System Status</div>',
-            unsafe_allow_html=True,
-        )
-        pg_pill = connection_pill("Postgres", health["postgres"])
-        llm_pill = connection_pill("LLM", health["llm"])
-        st.markdown(
-            f'<div style="display:flex;gap:6px;flex-wrap:wrap;">{pg_pill}{llm_pill}</div>',
-            unsafe_allow_html=True,
-        )
+        # ── Debug panel (collapsed by default) ───────────────────────────────
+        debug_open = st.session_state.get("_debug_open", False)
 
-        st.markdown("---")
-
-        # Sample data loader
-        n = st.empty()
-        if st.button(
-            f"{ICONS['info']} Load sample dataset",
+        col_dbg, _ = st.columns([1, 3])
+        if col_dbg.button(
+            "⚙",
+            key="debug_toggle",
+            help="Developer tools",
             use_container_width=True,
-            help="Populate the app with demo data for testing",
         ):
-            from planner.ui.sample_data import load_samples
-            count = load_samples()
-            n.success(f"Loaded {count} note(s).")
+            st.session_state["_debug_open"] = not debug_open
+            st.rerun()
 
-        st.markdown("---")
-        st.markdown(
-            f'<div style="font-size:10px;font-weight:700;color:{COLORS["text_muted"]};'
-            f'text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">Webhook API</div>'
-            f'<div style="font-size:11px;color:{COLORS["text_secondary"]};line-height:1.6;">'
-            f'POST meeting transcripts automatically:<br>'
-            f'<code style="font-size:10px;color:{COLORS["primary"]};">localhost:8502/api/ingest</code>'
-            f'</div>',
-            unsafe_allow_html=True,
-        )
+        if st.session_state.get("_debug_open", False):
+            health = _check_health()
+            st.markdown(
+                f'<div style="background:{COLORS["surface_hi"]};border:1px solid {COLORS["border"]};'
+                f'border-radius:10px;padding:14px;margin-top:6px;">'
+                f'<div style="font-size:10px;font-weight:700;color:{COLORS["text_muted"]};'
+                f'text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">System Status</div>',
+                unsafe_allow_html=True,
+            )
+            pg_pill = connection_pill("Postgres", health["postgres"])
+            llm_pill = connection_pill("LLM", health["llm"])
+            st.markdown(
+                f'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">'
+                f'{pg_pill}{llm_pill}</div>',
+                unsafe_allow_html=True,
+            )
+            n = st.empty()
+            if st.button(
+                "Load sample dataset",
+                use_container_width=True,
+                key="load_samples_debug",
+            ):
+                from planner.ui.sample_data import load_samples
+                count = load_samples()
+                n.success(f"Loaded {count} note(s).")
+            st.markdown(
+                f'<div style="font-size:10px;color:{COLORS["text_muted"]};margin-top:10px;">'
+                f'Webhook: <code style="color:{COLORS["primary"]};">:8502/api/ingest</code>'
+                f'</div></div>',
+                unsafe_allow_html=True,
+            )
 
     # ── Main Content ─────────────────────────────────────────────────────────
     if page == "Inbox":
