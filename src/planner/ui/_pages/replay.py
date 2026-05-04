@@ -5,7 +5,7 @@ import streamlit as st
 
 from planner.db import session_scope
 from planner.repositories import change_log_repo, meeting_notes_repo, tasks_repo
-from planner.ui.styles import COLORS, empty_state, section_header
+from planner.ui.styles import COLORS, empty_state
 
 
 def _format_diff(before: dict | None, after: dict | None) -> str:

@@ -8,16 +8,30 @@ import streamlit as st
 from planner.service import PlannerService
 from planner.ui.styles import COLORS, ICONS
 
+_LABEL_STYLE = (
+    f"font-size:11px;font-weight:700;text-transform:uppercase;"
+    f"letter-spacing:0.06em;color:{COLORS['text_secondary']};margin-bottom:4px;"
+)
+
+
+def _label(text: str, top_margin: str = "0") -> None:
+    st.markdown(
+        f'<div style="{_LABEL_STYLE}margin-top:{top_margin};">{text}</div>',
+        unsafe_allow_html=True,
+    )
+
 
 def render() -> None:
-    # Header
+    # ── Header ────────────────────────────────────────────────────────────────
     st.markdown(
         f"""
-        <div style="margin-bottom:4px;">
-            <div style="font-size:28px;font-weight:800;color:{COLORS['text']};letter-spacing:-0.02em;">
+        <div style="margin-bottom:20px;">
+            <div style="font-size:26px;font-weight:800;color:{COLORS['text']};
+                        letter-spacing:-0.02em;line-height:1.2;">
                 Inbox
             </div>
-            <div style="font-size:14px;color:{COLORS['text_muted']};margin-top:6px;">
+            <div style="font-size:13px;color:{COLORS['text_secondary']};margin-top:6px;
+                        line-height:1.6;max-width:680px;">
                 Paste a meeting note or upload a file. The agent extracts tasks,
                 compares them to the current plan, and prepares a draft for review.
             </div>
@@ -26,89 +40,77 @@ def render() -> None:
         unsafe_allow_html=True,
     )
 
-    # Form card
+    # ── Card wrapper (open) ───────────────────────────────────────────────────
     st.markdown(
         f"""
         <div style="background:{COLORS['surface']};border:1px solid {COLORS['border']};
-        border-radius:14px;padding:24px;margin-top:20px;">
+                    border-radius:12px;padding:24px;">
         """,
         unsafe_allow_html=True,
     )
 
     with st.form("ingest_form", clear_on_submit=False):
-        # Metadata row
+
+        # ── Row 1: Title | Meeting Date ───────────────────────────────────────
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown(
-                f'<div style="font-size:12px;font-weight:700;color:{COLORS["text_secondary"]};'
-                f'margin-bottom:4px;">Title</div>',
-                unsafe_allow_html=True,
+            _label("Title")
+            title = st.text_input(
+                "Title",
+                value="",
+                placeholder="e.g. Weekly Standup Notes",
+                label_visibility="collapsed",
             )
-            title = st.text_input("Title", value="", label_visibility="collapsed")
-            st.markdown(
-                f'<div style="font-size:12px;font-weight:700;color:{COLORS["text_secondary"]};'
-                f'margin-bottom:4px;margin-top:12px;">Source type</div>',
-                unsafe_allow_html=True,
+        with col2:
+            _label("Meeting Date")
+            meeting_date = st.date_input(
+                "Meeting date",
+                value=date.today(),
+                label_visibility="collapsed",
             )
+
+        # ── Row 2: Source Type | Attendees ────────────────────────────────────
+        col3, col4 = st.columns(2)
+        with col3:
+            _label("Source Type", top_margin="12px")
             source = st.selectbox(
                 "Source type",
                 ["meeting", "email", "chat"],
                 label_visibility="collapsed",
             )
-        with col2:
-            st.markdown(
-                f'<div style="font-size:12px;font-weight:700;color:{COLORS["text_secondary"]};'
-                f'margin-bottom:4px;">Meeting date</div>',
-                unsafe_allow_html=True,
-            )
-            meeting_date = st.date_input("Meeting date", value=date.today(), label_visibility="collapsed")
-            st.markdown(
-                f'<div style="font-size:12px;font-weight:700;color:{COLORS["text_secondary"]};'
-                f'margin-bottom:4px;margin-top:12px;">Attendees</div>',
-                unsafe_allow_html=True,
-            )
+        with col4:
+            _label("Attendees", top_margin="12px")
             attendees_raw = st.text_input(
-                "Attendees (comma-separated)", value="", label_visibility="collapsed",
+                "Attendees",
+                value="",
                 placeholder="e.g. Alice, Bob, Charlie",
+                label_visibility="collapsed",
             )
 
-        # Content area
-        st.markdown(
-            f'<div style="font-size:12px;font-weight:700;color:{COLORS["text_secondary"]};'
-            f'margin:16px 0 4px;">Content</div>',
-            unsafe_allow_html=True,
-        )
-
-        uploaded = st.file_uploader(
-            "Upload a file (.txt, .md, .eml)",
-            type=["txt", "md", "eml"],
-            label_visibility="collapsed",
-        )
-
+        # ── Content textarea ──────────────────────────────────────────────────
+        _label("Content", top_margin="16px")
         pasted = st.text_area(
-            "Or paste content here",
-            height=200,
+            "Content",
+            height=180,
             placeholder="Paste your meeting notes, email, or chat transcript here...",
             label_visibility="collapsed",
         )
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
-        # Submit button
+        # ── Submit button ─────────────────────────────────────────────────────
         submitted = st.form_submit_button(
-            f"{ICONS['success']} Process with Agent",
+            "Process with Agent",
             type="primary",
             use_container_width=True,
         )
 
+    # Card wrapper (close)
+    st.markdown("</div>", unsafe_allow_html=True)
+
     if not submitted:
         return
 
-    text = ""
-    if uploaded is not None:
-        text = uploaded.read().decode("utf-8", errors="replace")
-    if pasted.strip():
-        text = pasted.strip()
+    # ── Validation ────────────────────────────────────────────────────────────
+    text = pasted.strip()
 
     if not text:
         st.error("Please paste content or upload a file.")
@@ -120,12 +122,15 @@ def render() -> None:
     attendees = [a.strip() for a in attendees_raw.split(",") if a.strip()]
     service = PlannerService()
 
-    # Pipeline with styled status
+    # ── Pipeline with styled status ───────────────────────────────────────────
     with st.status("Running agent pipeline…", expanded=True) as status:
         st.write("Saving note to database…")
         note = service.ingest_note(
-            text=text, source=source, title=title.strip(),
-            meeting_date=meeting_date, attendees=attendees,
+            text=text,
+            source=source,
+            title=title.strip(),
+            meeting_date=meeting_date,
+            attendees=attendees,
         )
         st.write(f"Note saved · extracting tasks from {len(text):,} characters…")
         try:
@@ -138,20 +143,22 @@ def render() -> None:
         st.write(f"Classified {n} change(s) · draft ready for review.")
         status.update(label=f"Done — {n} proposed change(s)", state="complete")
 
-    # Result card
+    # ── Result card ───────────────────────────────────────────────────────────
     st.session_state["last_draft_id"] = str(draft.id)
     st.markdown(
         f"""
         <div style="background:{COLORS['surface']};border:1px solid {COLORS['success']}44;
-        border-radius:12px;padding:20px;margin-top:16px;">
-            <div style="font-size:13px;font-weight:700;color:{COLORS['success']};margin-bottom:8px;">
+                    border-radius:12px;padding:20px;margin-top:16px;">
+            <div style="font-size:13px;font-weight:700;color:{COLORS['success']};
+                        margin-bottom:8px;">
                 {ICONS['success']} Draft Generated
             </div>
             <div style="font-size:14px;color:{COLORS['text']};">
                 {draft.summary_md or "_(no summary)_"}
             </div>
             <div style="margin-top:12px;font-size:13px;color:{COLORS['text_secondary']};">
-                Open <strong style="color:{COLORS['primary']};">Drafts</strong> in the sidebar to review and approve.
+                Open <strong style="color:{COLORS['primary']};">Drafts</strong>
+                in the sidebar to review and approve.
             </div>
         </div>
         """,

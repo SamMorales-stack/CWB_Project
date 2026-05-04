@@ -13,6 +13,19 @@ from rapidfuzz import fuzz, process
 from planner.db import session_scope
 from planner.repositories import change_log_repo, tasks_repo
 
+# ── Design tokens ─────────────────────────────────────────────────────────────
+_BG          = "#0B0F19"
+_SURFACE     = "#111827"
+_SURFACE_HI  = "#1F2937"
+_BORDER      = "#374151"
+_PRIMARY     = "#2563EB"
+_TEXT        = "#F9FAFB"
+_TEXT_SEC    = "#9CA3AF"
+_TEXT_MUTED  = "#6B7280"
+_SUCCESS     = "#2DD4BF"
+_WARNING     = "#FBBF24"
+_ERROR       = "#F87171"
+
 _STATUS_LABELS = {
     "not_started": "Not Started",
     "in_progress": "In Progress",
@@ -20,14 +33,34 @@ _STATUS_LABELS = {
     "done":        "Done",
 }
 
+_STATUS_COLOR = {
+    "not_started": "#64748B",
+    "in_progress": "#2563EB",
+    "blocked":     "#F87171",
+    "done":        "#2DD4BF",
+}
+
+_PRIORITY_COLOR = {
+    "high":   "#F87171",
+    "medium": "#FBBF24",
+    "med":    "#FBBF24",
+    "low":    "#9CA3AF",
+}
+
+_PRIORITY_LABEL = {
+    "high":   "High",
+    "medium": "Medium",
+    "med":    "Medium",
+    "low":    "Low",
+}
+
+# kept for Task History / vs. Baseline tabs
 _STATUS_BG = {
     "Not Started": ("rgba(100,116,139,0.15)", "#64748B"),
     "In Progress":  ("rgba(37,99,235,0.15)",  "#2563EB"),
     "On Hold":      ("rgba(248,113,113,0.15)", "#F87171"),
     "Done":         ("rgba(45,212,191,0.12)",  "#2DD4BF"),
 }
-
-_PRIORITY_ICON = {"high": "🔴", "medium": "🟡", "med": "🟡", "low": "🟢"}
 
 _BASELINE_URL = "https://raw.githubusercontent.com/DoreenSteven/CWB_SJ/main/tasks_master.csv"
 _STATUS_MAP = {
@@ -61,9 +94,118 @@ def _fetch_baseline() -> list[dict]:
     return rows
 
 
+def _hex_to_rgba(hex_color: str, alpha: float) -> str:
+    """Convert a #RRGGBB hex string to an rgba() CSS value."""
+    h = hex_color.lstrip("#")
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def _status_pill(status_key: str) -> str:
+    """Return an HTML pill badge for a status key."""
+    label = _STATUS_LABELS.get(status_key, status_key)
+    color = _STATUS_COLOR.get(status_key, _TEXT_MUTED)
+    bg    = _hex_to_rgba(color, 0.20)
+    bd    = _hex_to_rgba(color, 0.40)
+    return (
+        f'<span style="display:inline-block;padding:3px 10px;border-radius:12px;'
+        f'font-size:11px;font-weight:700;background:{bg};color:{color};'
+        f'border:1px solid {bd};">{label}</span>'
+    )
+
+
+def _priority_html(priority_key: str) -> str:
+    """Return colored priority text."""
+    label = _PRIORITY_LABEL.get(priority_key, priority_key.capitalize() if priority_key else "—")
+    color = _PRIORITY_COLOR.get(priority_key, _TEXT_MUTED)
+    return f'<span style="color:{color};font-weight:600;font-size:13px;">{label}</span>'
+
+
+def _fmt_due(due_date: date | None, today: date) -> str:
+    """Format a due date, coloured red if overdue."""
+    if not due_date:
+        return f'<span style="color:{_TEXT_MUTED};">—</span>'
+    label = due_date.strftime("%b %-d") if hasattr(due_date, "strftime") else str(due_date)
+    # Windows strftime doesn't support %-d; use a fallback
+    try:
+        label = due_date.strftime("%b %-d")
+    except ValueError:
+        label = due_date.strftime("%b %d").replace(" 0", " ")
+    color = _ERROR if due_date < today else _TEXT_SEC
+    return f'<span style="color:{color};font-size:13px;">{label}</span>'
+
+
+def _task_table_html(tasks_list: list[dict], today: date) -> str:
+    """Build and return a full HTML table string for the given tasks."""
+    th_style = (
+        f"font-size:11px;text-transform:uppercase;font-weight:700;"
+        f"color:{_TEXT_MUTED};background:{_SURFACE_HI};"
+        f"padding:10px 16px;text-align:left;white-space:nowrap;"
+    )
+    table_style = (
+        "width:100%;border-collapse:collapse;"
+        "font-family:inherit;"
+    )
+
+    header = (
+        f'<thead><tr>'
+        f'<th style="{th_style}">TASK</th>'
+        f'<th style="{th_style}">OWNER</th>'
+        f'<th style="{th_style}">DUE</th>'
+        f'<th style="{th_style}">STATUS</th>'
+        f'<th style="{th_style}">PRIORITY</th>'
+        f'</tr></thead>'
+    )
+
+    rows_html = []
+    for t in tasks_list:
+        is_done = t.get("status") == "done"
+        row_opacity = "opacity:0.45;" if is_done else ""
+        row_style = (
+            f"background:{_SURFACE};border-bottom:1px solid {_BORDER};"
+            f"{row_opacity}"
+        )
+        td_base = "padding:10px 16px;vertical-align:middle;"
+
+        task_cell = (
+            f'<td style="{td_base}font-size:13px;font-weight:600;color:{_TEXT};">'
+            f'{t.get("title","")}</td>'
+        )
+        owner_val = t.get("owner") or "—"
+        owner_cell = (
+            f'<td style="{td_base}font-size:13px;color:{_TEXT_SEC};">'
+            f'{owner_val}</td>'
+        )
+        due_cell   = f'<td style="{td_base}">{_fmt_due(t.get("due_date"), today)}</td>'
+        status_cell = f'<td style="{td_base}">{_status_pill(t.get("status",""))}</td>'
+        priority_cell = f'<td style="{td_base}">{_priority_html(t.get("priority",""))}</td>'
+
+        rows_html.append(
+            f'<tr style="{row_style}">'
+            f'{task_cell}{owner_cell}{due_cell}{status_cell}{priority_cell}'
+            f'</tr>'
+        )
+
+    body = f'<tbody>{"".join(rows_html)}</tbody>' if rows_html else (
+        f'<tbody><tr><td colspan="5" style="padding:20px 16px;color:{_TEXT_MUTED};">'
+        f'No tasks match the current filters.</td></tr></tbody>'
+    )
+
+    return (
+        f'<div style="border:1px solid {_BORDER};border-radius:8px;overflow:hidden;">'
+        f'<table style="{table_style}">{header}{body}</table>'
+        f'</div>'
+    )
+
+
 def render() -> None:
-    st.title("Tracker")
-    st.caption("Current state of the plan. Updated whenever a draft is approved.")
+    # ── Page header ───────────────────────────────────────────────────────────
+    st.markdown(
+        f'<p style="font-size:26px;font-weight:800;color:{_TEXT};margin:0 0 4px 0;">Tracker</p>'
+        f'<p style="font-size:13px;color:{_TEXT_MUTED};margin:0 0 24px 0;">'
+        f'Current state of the plan. Updated whenever a draft is approved.</p>',
+        unsafe_allow_html=True,
+    )
 
     with session_scope() as s:
         tasks = tasks_repo.list_all(s)
@@ -105,17 +247,21 @@ def render() -> None:
         from planner.repositories import drafts_repo
         pending_count = len(drafts_repo.list_pending(s))
 
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Total Tasks", total)
-    m2.metric(
-        "Overdue", overdue_count,
-        delta=f"{overdue_count} overdue" if overdue_count else None,
-        delta_color="inverse",
-    )
-    m3.metric("Pending Drafts", pending_count)
-    m4.metric("Applied This Week", this_week)
+    def _metric_card(label: str, value: int | str, value_color: str) -> str:
+        return (
+            f'<div style="background:{_SURFACE};border:1px solid {_BORDER};'
+            f'border-radius:12px;padding:20px;">'
+            f'<div style="font-size:11px;text-transform:uppercase;font-weight:700;'
+            f'color:{_TEXT_MUTED};margin-bottom:8px;">{label}</div>'
+            f'<div style="font-size:28px;font-weight:800;color:{value_color};">{value}</div>'
+            f'</div>'
+        )
 
-    st.markdown("---")
+    m1, m2, m3, m4 = st.columns(4)
+    m1.markdown(_metric_card("TOTAL TASKS",       total,         _PRIMARY), unsafe_allow_html=True)
+    m2.markdown(_metric_card("OVERDUE",           overdue_count, _ERROR),   unsafe_allow_html=True)
+    m3.markdown(_metric_card("PENDING DRAFTS",    pending_count, _WARNING), unsafe_allow_html=True)
+    m4.markdown(_metric_card("APPLIED THIS WEEK", this_week,     _SUCCESS), unsafe_allow_html=True)
 
     tab_tasks, tab_history, tab_baseline = st.tabs(
         ["Tasks", "Task History", "vs. Baseline"]
@@ -123,58 +269,81 @@ def render() -> None:
 
     # ── Tab: Tasks ────────────────────────────────────────────────────────────
     with tab_tasks:
-        urgent = df[df["overdue"] | ((df["priority"] == "high") & (df["status"] != "done"))]
-        if not urgent.empty:
-            st.subheader("Urgent")
-            u_display = urgent[["title", "owner", "due_date", "status", "priority"]].copy()
-            u_display["status"] = u_display["status"].map(_STATUS_LABELS)
-            st.dataframe(
-                u_display.style.map(_status_cell, subset=["status"]),
-                hide_index=True,
-                use_container_width=True,
+        # ── Urgent Attention ──────────────────────────────────────────────────
+        urgent_df = df[
+            df["overdue"] | ((df["priority"] == "high") & (df["status"] != "done"))
+        ]
+
+        st.markdown(
+            f'<p style="font-size:11px;text-transform:uppercase;font-weight:700;'
+            f'color:{_TEXT_MUTED};margin:24px 0 10px 0;">URGENT ATTENTION</p>',
+            unsafe_allow_html=True,
+        )
+
+        urgent_tasks = urgent_df.to_dict("records")
+        st.markdown(_task_table_html(urgent_tasks, today), unsafe_allow_html=True)
+
+        # ── Filter row ────────────────────────────────────────────────────────
+        st.markdown("<div style='margin-top:24px;'></div>", unsafe_allow_html=True)
+
+        col1, col2, col3 = st.columns([2, 2, 1])
+
+        with col1:
+            st.markdown(
+                f'<p style="font-size:11px;text-transform:uppercase;font-weight:700;'
+                f'color:{_TEXT_MUTED};margin:0 0 4px 0;">STATUS</p>',
+                unsafe_allow_html=True,
+            )
+            all_statuses = sorted(df["status"].unique())
+            status_options = ["__all__"] + all_statuses
+            status_filter = st.selectbox(
+                "status_select",
+                options=status_options,
+                format_func=lambda s: "All statuses" if s == "__all__" else _STATUS_LABELS.get(s, s),
+                label_visibility="collapsed",
+                key="tracker_status_filter",
             )
 
-        st.subheader("All tasks")
-        col1, col2, col3 = st.columns(3)
-        status_filter = col1.multiselect(
-            "Status", sorted(df["status"].unique()),
-            format_func=lambda s: _STATUS_LABELS.get(s, s),
-        )
-        owner_filter = col2.multiselect("Owner", sorted(o for o in df["owner"].unique() if o))
-        only_open = col3.checkbox("Hide done", value=True)
+        with col2:
+            st.markdown(
+                f'<p style="font-size:11px;text-transform:uppercase;font-weight:700;'
+                f'color:{_TEXT_MUTED};margin:0 0 4px 0;">OWNER</p>',
+                unsafe_allow_html=True,
+            )
+            all_owners = sorted(o for o in df["owner"].unique() if o)
+            owner_options = ["__all__"] + all_owners
+            owner_filter = st.selectbox(
+                "owner_select",
+                options=owner_options,
+                format_func=lambda o: "All owners" if o == "__all__" else o,
+                label_visibility="collapsed",
+                key="tracker_owner_filter",
+            )
 
+        with col3:
+            st.markdown(
+                f'<p style="font-size:11px;text-transform:uppercase;font-weight:700;'
+                f'color:{_TEXT_MUTED};margin:0 0 4px 0;">HIDE COMPLETED</p>',
+                unsafe_allow_html=True,
+            )
+            hide_done = st.checkbox(
+                "hide_done",
+                value=True,
+                label_visibility="collapsed",
+                key="tracker_hide_done",
+            )
+
+        # ── All tasks table ───────────────────────────────────────────────────
         filtered = df.copy()
-        if status_filter:
-            filtered = filtered[filtered["status"].isin(status_filter)]
-        if owner_filter:
-            filtered = filtered[filtered["owner"].isin(owner_filter)]
-        if only_open:
+        if status_filter != "__all__":
+            filtered = filtered[filtered["status"] == status_filter]
+        if owner_filter != "__all__":
+            filtered = filtered[filtered["owner"] == owner_filter]
+        if hide_done:
             filtered = filtered[filtered["status"] != "done"]
 
-        filtered = filtered.copy()
-        filtered["priority"] = filtered["priority"].map(lambda p: _PRIORITY_ICON.get(p, p))
-        filtered["status"] = filtered["status"].map(_STATUS_LABELS)
-
-        def _row_style(row):
-            due = row.get("due_date")
-            is_overdue = bool(due and due < today)
-            is_due_soon = bool(due and today <= due <= today + timedelta(days=3))
-            if is_overdue:
-                return ["background-color: rgba(241,91,181,0.12)"] * len(row)
-            if is_due_soon:
-                return ["background-color: rgba(254,228,64,0.08)"] * len(row)
-            if row.get("status") == "Done":
-                return ["opacity: 0.45"] * len(row)
-            return [""] * len(row)
-
-        show_cols = ["title", "owner", "due_date", "status", "priority", "updated_at"]
-        st.dataframe(
-            filtered[show_cols]
-            .style.apply(_row_style, axis=1)
-            .map(_status_cell, subset=["status"]),
-            hide_index=True,
-            use_container_width=True,
-        )
+        all_tasks = filtered.to_dict("records")
+        st.markdown(_task_table_html(all_tasks, today), unsafe_allow_html=True)
 
     # ── Tab: Task History (Bidirectional Traceability) ────────────────────────
     with tab_history:
