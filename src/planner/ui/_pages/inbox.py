@@ -67,6 +67,7 @@ def render() -> None:
             source = st.selectbox(
                 "Source type",
                 ["meeting", "email", "chat"],
+                format_func=lambda s: s.capitalize(),
                 label_visibility="collapsed",
             )
         with col4:
