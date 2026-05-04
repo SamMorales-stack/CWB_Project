@@ -40,15 +40,6 @@ def render() -> None:
         unsafe_allow_html=True,
     )
 
-    # ── Card wrapper (open) ───────────────────────────────────────────────────
-    st.markdown(
-        f"""
-        <div style="background:{COLORS['surface']};border:1px solid {COLORS['border']};
-                    border-radius:12px;padding:24px;">
-        """,
-        unsafe_allow_html=True,
-    )
-
     with st.form("ingest_form", clear_on_submit=False):
 
         # ── Row 1: Title | Meeting Date ───────────────────────────────────────
@@ -102,9 +93,6 @@ def render() -> None:
             type="primary",
             use_container_width=True,
         )
-
-    # Card wrapper (close)
-    st.markdown("</div>", unsafe_allow_html=True)
 
     if not submitted:
         return

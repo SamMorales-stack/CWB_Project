@@ -194,11 +194,19 @@ def inject_global_css() -> None:
         color: {COLORS["text"]} !important;
     }}
 
+    /* Style st.form as a card */
+    [data-testid="stForm"] {{
+        background: {COLORS["surface"]} !important;
+        border: 1px solid {COLORS["border"]} !important;
+        border-radius: 12px !important;
+        padding: 24px !important;
+    }}
+
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea,
     .stSelectbox > div > div > div,
     .stDateInput > div > div > input {{
-        background: {COLORS["surface"]} !important;
+        background: {COLORS["surface_hi"]} !important;
         border: 1px solid {COLORS["border"]} !important;
         border-radius: 8px !important;
         color: {COLORS["text"]} !important; font-size: 14px !important;
