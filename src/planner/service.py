@@ -124,6 +124,12 @@ class PlannerService:
             )
 
     def run_pipeline(self, *, note_id: uuid.UUID) -> _DraftView:
+        # BOTTLENECK — the three stages are inherently sequential: extract must
+        # finish before classify can start (its input is extract's output), and
+        # classify must finish before draft. There is no parallelism available
+        # within a single pipeline run. Total wall time = sum of all three LLM
+        # calls. The only levers are: fewer calls (batching), faster models
+        # (flash vs. pro), and shorter prompts (fewer tokens).
         note = self.get_note(note_id=note_id)
         items = self.extract_items(note=note)
         changes = self.classify_items(note_id=note_id, items=items)

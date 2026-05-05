@@ -23,10 +23,16 @@ class PlannerAgent:
     ) -> list[ProposedChange]:
         if not items:
             return []
-        # collect candidates locally (fast), then classify all in one LLM call
+        # Candidate lookup is local DB + fuzzy string match — fast, not a bottleneck.
         candidates_per_item = [
             build_candidate_matches(session, item=item, limit=5) for item in items
         ]
+        # BOTTLENECK (old pattern, now fixed) — the original code called
+        # tools.classify_change() inside a `for item in items` loop: one LLM
+        # round-trip per item, executed serially. With N=5 items at ~30-60 s
+        # each, total classify time was 150-300 s. The fix: send all items in a
+        # single batch call so the model classifies everything in one inference
+        # pass, reducing N network round-trips to 1.
         classifications = tools.batch_classify_changes(
             items=items, candidates_per_item=candidates_per_item,
         )

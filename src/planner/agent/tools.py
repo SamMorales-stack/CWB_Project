@@ -33,6 +33,9 @@ def extract_tasks(
 ) -> list[ExtractedItem]:
     """Extract task-shaped items from a meeting note."""
     s = get_settings()
+    # BOTTLENECK — input token count drives inference time: a 1,000-token note
+    # takes noticeably longer than a 200-token note. Trim whitespace and limit
+    # note length upstream if latency is critical.
     user = EXTRACT_USER_TEMPLATE.format(
         source=source, meeting_date=meeting_date, title=title, content=note_text,
     ) + schema_to_user_hint(ExtractionResult)
@@ -69,6 +72,10 @@ def batch_classify_changes(
 ) -> list[ClassificationResult]:
     """Classify all extracted items in a single LLM call."""
     s = get_settings()
+    # BOTTLENECK (trade-off) — batching reduces round-trips from N to 1, but
+    # increases payload size. Very large batches (20+ items) can exceed context
+    # limits or cause the model to drop items from the output; if that happens,
+    # split into chunks of ~10 and call twice instead.
     payload = [
         {
             "item": item.model_dump(mode="json"),

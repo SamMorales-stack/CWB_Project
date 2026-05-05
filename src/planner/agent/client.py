@@ -13,6 +13,9 @@ from planner.config import get_settings
 @lru_cache(maxsize=1)
 def get_client() -> OpenAI:
     s = get_settings()
+    # BOTTLENECK — no timeout: the openai SDK default is 600 s (10 min), so a
+    # slow or unresponsive API endpoint hangs the entire Streamlit process with
+    # no error until the user gives up. Always set an explicit timeout.
     return OpenAI(
         api_key=s.opencode_api_key,
         base_url="https://opencode.ai/zen/go/v1/",
@@ -38,6 +41,10 @@ def structured_completion[T: BaseModel](
     client = get_client()
 
     def _call(strict_note: str = "") -> str:
+        # BOTTLENECK — every call here is a synchronous network round-trip to the
+        # LLM API: DNS + TLS + queuing on the provider + model inference + token
+        # streaming back. Latency is dominated by model inference (10-60 s for
+        # large models). Minimize calls; never call in a loop when batching works.
         response = client.chat.completions.create(
             model=deployment,
             messages=[
@@ -54,6 +61,8 @@ def structured_completion[T: BaseModel](
         data = json.loads(raw)
         return schema_model.model_validate(data)
     except Exception:
+        # BOTTLENECK — validation failure triggers a second full round-trip.
+        # Keep prompts and schemas simple to avoid hitting this path.
         retry = _call(
             strict_note=(
                 "\n\nIMPORTANT: Your previous response was invalid JSON or did not match "
