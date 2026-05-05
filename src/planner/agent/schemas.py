@@ -60,5 +60,9 @@ class ProposedChange(BaseModel):
     reason: str = ""
 
 
+class BatchClassificationResult(BaseModel):
+    classifications: list[ClassificationResult]
+
+
 class DraftSummary(BaseModel):
     summary_md: str

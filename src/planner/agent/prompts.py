@@ -49,6 +49,27 @@ Candidate existing tasks:
 """
 
 
+BATCH_CLASSIFY_SYSTEM = """You are a project-controls assistant that classifies extracted task items.
+
+For EACH item in the input list, decide whether it is:
+  - "create" — a brand new task not matching any existing task
+  - "update" — an update to one specific existing task
+  - "conflict" — ambiguous; matches more than one task or contradicts existing data
+
+Rules:
+- Use task title, owner, and content semantics to judge similarity.
+- For "update", set target_task_id to the matching task's id and fields_to_change to only the changed fields.
+- For "conflict", list every candidate id in candidate_task_ids.
+- Return classifications in the EXACT SAME ORDER as the input items.
+- Return ONLY a JSON object with a "classifications" array.
+"""
+
+
+BATCH_CLASSIFY_USER_TEMPLATE = """Items to classify (each with its candidate existing tasks):
+{items_json}
+"""
+
+
 DRAFT_SYSTEM = """You are a project-controls assistant that writes a short executive-friendly
 summary of proposed plan changes.
 

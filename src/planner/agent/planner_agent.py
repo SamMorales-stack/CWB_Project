@@ -21,11 +21,23 @@ class PlannerAgent:
     def classify_all(
         self, session: Session, *, items: list[ExtractedItem],
     ) -> list[ProposedChange]:
+        if not items:
+            return []
+        # collect candidates locally (fast), then classify all in one LLM call
+        candidates_per_item = [
+            build_candidate_matches(session, item=item, limit=5) for item in items
+        ]
+        classifications = tools.batch_classify_changes(
+            items=items, candidates_per_item=candidates_per_item,
+        )
+        # if LLM returned fewer results than items, pad with "create"
+        from planner.agent.schemas import ClassificationResult
+        while len(classifications) < len(items):
+            classifications.append(ClassificationResult(op="create", reason="fallback", confidence=0.5))
+
         proposed: list[ProposedChange] = []
-        for item in items:
-            candidates = build_candidate_matches(session, item=item, limit=5)
-            cls = tools.classify_change(item=item, candidates=candidates)
-            _exclude = {"evidence_quote", "confidence"}
+        _exclude = {"evidence_quote", "confidence"}
+        for item, cls in zip(items, classifications):
             fields = (
                 cls.fields_to_change
                 if cls.op == "update"

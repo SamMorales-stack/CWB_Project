@@ -5,6 +5,8 @@ import json
 
 from planner.agent.client import schema_to_user_hint, structured_completion
 from planner.agent.prompts import (
+    BATCH_CLASSIFY_SYSTEM,
+    BATCH_CLASSIFY_USER_TEMPLATE,
     CLASSIFY_SYSTEM,
     CLASSIFY_USER_TEMPLATE,
     DIGEST_SYSTEM,
@@ -15,6 +17,7 @@ from planner.agent.prompts import (
     EXTRACT_USER_TEMPLATE,
 )
 from planner.agent.schemas import (
+    BatchClassificationResult,
     CandidateMatch,
     ClassificationResult,
     DraftSummary,
@@ -46,19 +49,44 @@ def extract_tasks(
 def classify_change(
     *, item: ExtractedItem, candidates: list[CandidateMatch],
 ) -> ClassificationResult:
-    """Decide whether the extracted item is create, update, or conflict."""
+    """Decide whether the extracted item is create, update, or conflict (single item)."""
     s = get_settings()
     user = CLASSIFY_USER_TEMPLATE.format(
         item_json=item.model_dump_json(indent=2),
         candidates_json=json.dumps([c.model_dump(mode="json") for c in candidates], indent=2),
     ) + schema_to_user_hint(ClassificationResult)
     return structured_completion(
-        deployment=s.azure_openai_deployment_main,
+        deployment=s.azure_openai_deployment_fast,
         system=CLASSIFY_SYSTEM,
         user=user,
         schema_model=ClassificationResult,
         temperature=0.1,
     )
+
+
+def batch_classify_changes(
+    *, items: list[ExtractedItem], candidates_per_item: list[list[CandidateMatch]],
+) -> list[ClassificationResult]:
+    """Classify all extracted items in a single LLM call."""
+    s = get_settings()
+    payload = [
+        {
+            "item": item.model_dump(mode="json"),
+            "candidates": [c.model_dump(mode="json") for c in candidates],
+        }
+        for item, candidates in zip(items, candidates_per_item)
+    ]
+    user = BATCH_CLASSIFY_USER_TEMPLATE.format(
+        items_json=json.dumps(payload, indent=2),
+    ) + schema_to_user_hint(BatchClassificationResult)
+    result = structured_completion(
+        deployment=s.azure_openai_deployment_fast,
+        system=BATCH_CLASSIFY_SYSTEM,
+        user=user,
+        schema_model=BatchClassificationResult,
+        temperature=0.1,
+    )
+    return result.classifications
 
 
 def generate_draft(*, changes: list[ProposedChange]) -> DraftSummary:
@@ -70,7 +98,7 @@ def generate_draft(*, changes: list[ProposedChange]) -> DraftSummary:
         + schema_to_user_hint(DraftSummary)
     )
     return structured_completion(
-        deployment=s.azure_openai_deployment_main,
+        deployment=s.azure_openai_deployment_fast,
         system=DRAFT_SYSTEM,
         user=user,
         schema_model=DraftSummary,
