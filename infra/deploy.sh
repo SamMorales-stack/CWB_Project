@@ -2,10 +2,11 @@
 # Provision Azure resources and deploy the SJ Planner Agent container.
 #
 # Required environment variables (set before running):
-#   APP_NAME            unique short name, e.g. sjplanner-sm7k3x
-#   LOCATION            Azure region matching your subscription policy (e.g. eastasia)
-#   OPENCODE_API_KEY    OpenCode Go API key from opencode.ai workspace
-#   PG_ADMIN_PASSWORD   Postgres admin password (16+ chars, mixed case + digit + symbol)
+#   APP_NAME                    unique short name, e.g. sjplanner-sm7k3x
+#   LOCATION                    Azure region matching your subscription policy (e.g. eastasia)
+#   AZURE_OPENAI_API_KEY        API key from Azure AI Foundry > Keys & Endpoint
+#   AZURE_OPENAI_ENDPOINT       e.g. https://<resource>.cognitiveservices.azure.com/
+#   PG_ADMIN_PASSWORD           Postgres admin password (16+ chars, mixed case + digit + symbol)
 #
 # Usage: export the vars above, then run ./infra/deploy.sh
 # Idempotent: re-running pushes a new image and updates the Container App.
@@ -14,7 +15,8 @@ set -euo pipefail
 
 : "${APP_NAME:?must set APP_NAME}"
 : "${LOCATION:?must set LOCATION}"
-: "${OPENCODE_API_KEY:?must set OPENCODE_API_KEY}"
+: "${AZURE_OPENAI_API_KEY:?must set AZURE_OPENAI_API_KEY}"
+: "${AZURE_OPENAI_ENDPOINT:?must set AZURE_OPENAI_ENDPOINT}"
 : "${PG_ADMIN_PASSWORD:?must set PG_ADMIN_PASSWORD}"
 
 RG="${APP_NAME}-rg"
@@ -99,12 +101,14 @@ else
         --ingress external \
         --min-replicas 1 \
         --max-replicas 1 \
-        --secrets "pg-url=$DATABASE_URL" "llm-key=$OPENCODE_API_KEY" \
+        --secrets "pg-url=$DATABASE_URL" "aoai-key=$AZURE_OPENAI_API_KEY" \
         --env-vars \
             "DATABASE_URL=secretref:pg-url" \
-            "OPENCODE_API_KEY=secretref:llm-key" \
-            "AZURE_OPENAI_DEPLOYMENT_MAIN=deepseek-v4-pro" \
-            "AZURE_OPENAI_DEPLOYMENT_FAST=deepseek-v4-flash" \
+            "AZURE_OPENAI_API_KEY=secretref:aoai-key" \
+            "AZURE_OPENAI_ENDPOINT=$AZURE_OPENAI_ENDPOINT" \
+            "AZURE_OPENAI_API_VERSION=2024-12-01-preview" \
+            "AZURE_OPENAI_DEPLOYMENT_MAIN=gpt-4o" \
+            "AZURE_OPENAI_DEPLOYMENT_FAST=gpt-4.1-nano" \
         --output none
 fi
 

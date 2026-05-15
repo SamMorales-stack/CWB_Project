@@ -1,24 +1,25 @@
-"""OpenCode Go client wrapper (opencode.ai/zen/go/v1 — OpenAI-compatible)."""
+"""Azure OpenAI client wrapper."""
 from __future__ import annotations
 
 import json
 from functools import lru_cache
 
-from openai import OpenAI
+from openai import AzureOpenAI
 from pydantic import BaseModel
 
 from planner.config import get_settings
 
 
 @lru_cache(maxsize=1)
-def get_client() -> OpenAI:
+def get_client() -> AzureOpenAI:
     s = get_settings()
     # BOTTLENECK — no timeout: the openai SDK default is 600 s (10 min), so a
     # slow or unresponsive API endpoint hangs the entire Streamlit process with
     # no error until the user gives up. Always set an explicit timeout.
-    return OpenAI(
-        api_key=s.opencode_api_key,
-        base_url="https://opencode.ai/zen/go/v1/",
+    return AzureOpenAI(
+        api_key=s.azure_openai_api_key,
+        azure_endpoint=s.azure_openai_endpoint,
+        api_version=s.azure_openai_api_version,
         max_retries=1,
         timeout=60.0,
     )
@@ -32,9 +33,7 @@ def structured_completion[T: BaseModel](
     schema_model: type[T],
     temperature: float = 0.1,
 ) -> T:
-    """Call Gemini via Google AI Studio's OpenAI-compatible endpoint.
-
-    Parses the response into the given Pydantic model.
+    """Call Azure OpenAI and parse the response into the given Pydantic model.
 
     Retries once with a stricter prompt on validation failure.
     """
