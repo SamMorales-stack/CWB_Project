@@ -1,4 +1,4 @@
-# SJ Project Planner Agent
+# PlanForge — SJ Project Planner Agent
 
 > Agentic AI assistant that converts unstructured project conversations into structured, auditable plan updates — with a human-in-the-loop approval workflow.
 
@@ -12,19 +12,43 @@
 
 ## Pitch Video
 
-🎬 **[YouTube URL — to be added after recording]**
+🎬 **[YouTube URL — to be added]**
+
+---
+
+## Screenshots
+
+| Tracker | Gantt |
+|---|---|
+| ![Tracker](docs/screenshots/01_tracker.jpeg) | ![Gantt](docs/screenshots/02_gantt.jpeg) |
+
+| Inbox | Inbox — Filled |
+|---|---|
+| ![Inbox](docs/screenshots/03_inbox.jpeg) | ![Inbox Submit](docs/screenshots/03_inbox_submit.jpeg) |
+
+| Agent Result | Drafts |
+|---|---|
+| ![Inbox Result](docs/screenshots/03_inbox_result.jpeg) | ![Drafts](docs/screenshots/04_drafts.jpeg) |
+
+| Change Log | Digest |
+|---|---|
+| ![Change Log](docs/screenshots/06_change_log.jpeg) | ![Digest](docs/screenshots/06_change_log_digest.jpeg) |
+
+| Replay |
+|---|
+| ![Replay](docs/screenshots/07_replay.jpeg) |
 
 ---
 
 ## What it does
 
-Project plans drift out of sync with reality because decisions made in meetings and emails never make it back into the official tracker. This assistant:
+Project plans drift out of sync with reality because decisions made in meetings and emails never make it back into the official tracker. PlanForge fixes this:
 
 1. **Ingests** a meeting note, email, or chat message via the Inbox
-2. **Extracts** task-shaped items — title, owner, due date, status, dependencies, and an evidence quote from the exact source sentence
-3. **Classifies** each item as a brand-new task, an update to an existing task, or a conflict requiring human clarification
+2. **Extracts** task-shaped items — title, owner, due date, status, and a verbatim evidence quote from the source
+3. **Classifies** each item as a new task, an update to an existing task, or a conflict requiring human clarification
 4. **Drafts** a structured plan-update proposal with an executive-friendly summary
-5. **Presents** the draft to a human reviewer who approves, rejects, or edits each change
+5. **Presents** the draft to a human reviewer who approves or rejects each change individually
 6. **Commits** approved changes atomically, recording a full before/after audit trail
 
 Nothing reaches the official tracker without explicit human approval.
@@ -33,63 +57,59 @@ Nothing reaches the official tracker without explicit human approval.
 
 ## Key Features
 
-### Basic Functions
-- **Meeting-to-plan translation** — extract tasks, owners, due dates, status signals, and dependency hints from natural-language notes and emails
-- **Structured tracker** — consistent schema: title, owner, due date, status, priority, source, confidence
+### Core
+- **Meeting-to-plan translation** — extract tasks, owners, due dates, and status signals from natural-language notes and emails
 - **Three-way classification** — NEW task / UPDATE existing / CONFLICT requiring clarification
-- **Plan Update Draft** — every proposed change paired with the verbatim evidence quote from the source
-- **Tracker + Gantt + Urgent panel** — filterable table with overdue/due-soon colour cues, Plotly Gantt timeline coloured by status
+- **Plan update draft** — every proposed change paired with the verbatim evidence quote from the source
+- **Tracker + Gantt** — filterable task table with overdue/due-soon colour cues and a Plotly Gantt timeline
 
-### Advanced Functions
-- **Human-in-the-loop approval** — per-change approve/reject/edit controls, bulk approve/reject, apply decisions atomically
+### Human-in-the-Loop
+- **Per-change approve/reject controls** — bulk or individual, applied atomically
+- **Confidence-driven UX** — high-confidence changes pre-checked; low-confidence flagged and requiring explicit action
 - **First-class conflict resolution** — side-by-side candidate comparison with Merge / Keep Separate
 
-### Innovation Features
-- **Confidence-driven UX** — high-confidence changes pre-checked; low-confidence flagged red and requiring explicit action
-- **Evidence-quote pinning** — every applied plan change traceable to the exact source sentence in the meeting note
-- **Weekly executive digest** — one-click agent summary of the last 7 days of plan changes for stakeholder reporting
-
-### Stretch Features
-- **Bidirectional traceability** — click any task in the Tracker to see every change ever applied to it, with timestamps, diffs, and the exact evidence quote from the source note
-- **Change detection vs. baseline** — compares the live plan against the original `tasks_master.csv` dataset, highlighting owner changes, date shifts > 7 days, and status changes
-- **Replay mode** — step through all ingested meeting notes chronologically with Prev/Next navigation, seeing exactly what each note contributed to the plan
+### Traceability
+- **Evidence-quote pinning** — every applied change traceable to the exact source sentence
+- **Full audit trail** — Change Log with before/after diffs, timestamps, and approver
+- **Weekly executive digest** — one-click AI summary of the last 7 days of plan changes
+- **Replay mode** — step through all ingested notes chronologically to see exactly what each contributed
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│         Streamlit Web App (Azure Container Apps)             │
-│  Pages: Inbox · Drafts · Tracker · Gantt · Change Log · Replay │
-└─────────────────┬───────────────────────────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      PlannerService                          │
-│    ingest_note · run_pipeline · apply_draft · digest         │
-└──────────┬──────────────────────────────┬───────────────────┘
-           │                              │
-           ▼                              ▼
-┌──────────────────────┐    ┌─────────────────────────────────┐
-│  PlannerAgent        │    │  Repository layer                │
-│  extract_tasks       │    │  meeting_notes · tasks           │
-│  classify_change     │    │  pending_drafts · change_log     │
-│  generate_draft      │    └────────────────┬────────────────┘
-│  summarize_changes   │                     │
-└──────────┬───────────┘                     ▼
-           │                    ┌────────────────────────┐
-           ▼                    │ Azure Database for      │
-┌──────────────────────┐        │ PostgreSQL (Flexible)   │
-│  OpenCode Go API     │        └────────────────────────┘
-│  DeepSeek V4 Pro     │
-│  (OpenAI-compatible) │
-└──────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│          Streamlit Web App (Azure Container Apps)             │
+│  Inbox · Drafts · Tracker · Gantt · Change Log · Replay      │
+└──────────────────┬───────────────────────────────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────────────────────────────┐
+│                       PlannerService                          │
+│     ingest_note · run_pipeline · apply_draft · digest         │
+└───────────┬──────────────────────────────┬────────────────────┘
+            │                              │
+            ▼                              ▼
+┌───────────────────────┐    ┌─────────────────────────────────┐
+│  PlannerAgent         │    │  Repository layer                │
+│  extract_tasks        │    │  meeting_notes · tasks           │
+│  batch_classify       │    │  pending_drafts · change_log     │
+│  generate_draft       │    └────────────────┬────────────────┘
+│  summarize_changes    │                     │
+└───────────┬───────────┘                     ▼
+            │                   ┌─────────────────────────────┐
+            ▼                   │  Azure Database for          │
+┌───────────────────────┐       │  PostgreSQL Flexible Server  │
+│  Azure OpenAI         │       └─────────────────────────────┘
+│  gpt-4o  (extract)    │
+│  gpt-4.1-nano (classify)│
+└───────────────────────┘
 ```
 
 **Four layers with strict one-way dependencies:**
 - **UI** — pure presentation, no business logic
-- **PlannerService** — owns the workflow
+- **PlannerService** — owns the pipeline workflow
 - **PlannerAgent** — four LLM-backed tools with Pydantic-validated structured outputs
 - **Repository layer** — typed CRUD over four PostgreSQL tables
 
@@ -99,30 +119,30 @@ Nothing reaches the official tracker without explicit human approval.
 
 | Layer | Technology |
 |---|---|
-| LLM | OpenCode Go (DeepSeek V4 Pro/Flash) via OpenAI-compatible API |
+| LLM | Azure OpenAI — `gpt-4o` (extraction) + `gpt-4.1-nano` (classification) |
 | Storage | Azure Database for PostgreSQL Flexible Server (SQLAlchemy 2 + Alembic) |
 | UI | Streamlit + Plotly |
 | Deployment | Azure Container Apps + Azure Container Registry |
 | Language | Python 3.12 |
-| Testing | pytest (unit tests with mocked LLM + live integration tests) |
-| CI | GitHub Actions (ruff + pytest on every push) |
+| Testing | pytest (unit + live integration tests) |
+| CI | GitHub Actions (ruff lint + pytest on every push) |
 
 ---
 
 ## Dataset
 
 Uses the official **CWB_SJ dataset** (CC0 license) from [github.com/DoreenSteven/CWB_SJ](https://github.com/DoreenSteven/CWB_SJ):
-- `tasks_master.csv` → loaded as the baseline plan (~50 tasks)
+- `tasks_master.csv` → loaded as the baseline plan (~284 tasks)
 - `meeting_notes.jsonl` → first 10 notes available to process through the agent
 - `emails.csv` → first 5 emails available as email-type meeting notes
 
-Click **Load sample dataset** in the sidebar to populate the app instantly for demo purposes.
+Click **Load sample dataset** in the sidebar to populate the app instantly.
 
 ---
 
 ## Run Locally
 
-**Prerequisites:** Python 3.12, Docker Desktop, an OpenCode Go API key from [opencode.ai](https://opencode.ai)
+**Prerequisites:** Python 3.12, Docker Desktop, an Azure OpenAI resource with `gpt-4o` and `gpt-4.1-nano` deployments.
 
 ```powershell
 # 1. Clone
@@ -130,16 +150,16 @@ git clone https://github.com/SamMorales-stack/CWB_Project.git
 cd CWB_Project
 
 # 2. Start local Postgres
-docker compose up -d postgres
+docker compose up -d
 
 # 3. Python environment
 python -m venv .venv
-.venv\Scripts\activate          # PowerShell on Windows
+.venv\Scripts\Activate.ps1      # PowerShell on Windows
 pip install -e ".[dev]"
 
 # 4. Configure
 copy .env.example .env
-# Edit .env: set OPENCODE_API_KEY and DATABASE_URL
+# Edit .env — set AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and DATABASE_URL
 
 # 5. Run migrations
 python -m alembic upgrade head
@@ -148,7 +168,7 @@ python -m alembic upgrade head
 streamlit run src/planner/ui/app.py
 ```
 
-Open http://localhost:8501, click **Load sample dataset** in the sidebar, then go to Inbox to process a meeting note.
+Open `http://localhost:8501`, click **Load sample dataset** in the sidebar, then go to Inbox to process a meeting note.
 
 ---
 
@@ -157,15 +177,16 @@ Open http://localhost:8501, click **Load sample dataset** in the sidebar, then g
 Requires Azure CLI (`az login`) and an Azure subscription with Container Apps access.
 
 ```bash
-export APP_NAME="sjplanner-<your-suffix>"   # globally unique
-export LOCATION="eastasia"                  # match your subscription's allowed regions
-export OPENCODE_API_KEY="your-opencode-key"
+export APP_NAME="sjplanner-<your-suffix>"        # globally unique
+export LOCATION="eastasia"                        # match your subscription region
+export AZURE_OPENAI_API_KEY="your-api-key"
+export AZURE_OPENAI_ENDPOINT="https://<resource>.cognitiveservices.azure.com/"
 export PG_ADMIN_PASSWORD="A-strong-password-123!"
 
 ./infra/deploy.sh
 ```
 
-The script provisions a resource group, ACR, PostgreSQL Flexible Server, Container Apps environment, and the app. Prints the live URL on completion.
+The script provisions in one shot: Resource Group → Azure Container Registry (image build + push) → PostgreSQL Flexible Server → Container Apps environment → Container App. Prints the live URL on completion.
 
 ---
 
@@ -175,7 +196,7 @@ The script provisions a resource group, ACR, PostgreSQL Flexible Server, Contain
 # Unit tests (mocked LLM, requires Postgres running)
 python -m pytest -m "not live" -v
 
-# Live integration tests (real LLM calls, small cost)
+# Live integration tests (real Azure OpenAI calls)
 python -m pytest -m live -v
 ```
 
@@ -185,7 +206,7 @@ python -m pytest -m live -v
 
 Per the hackathon's Generative AI Tools policy, this submission used:
 
-- **Claude Code (Anthropic, claude-sonnet-4-6)** — architecture design, implementation planning, and code generation throughout the project. See [`DEVLOG.md`](DEVLOG.md) for a full account of the development process.
-- **OpenCode Go / DeepSeek V4 Pro** — the LLM powering the application's four agent tools at runtime.
+- **Claude Code (Anthropic, claude-sonnet-4-6)** — architecture design, implementation planning, and code generation throughout the project.
+- **Azure OpenAI (gpt-4o + gpt-4.1-nano)** — the LLM models powering the application's agent pipeline at runtime.
 
-No AI-generated assets contain sensitive, confidential, or proprietary information. All code was developed during the hackathon period (2 April – 3 May 2026).
+No AI-generated assets contain sensitive, confidential, or proprietary information. All code was developed during the hackathon period.
