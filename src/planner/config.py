@@ -11,8 +11,8 @@ class Settings(BaseSettings):
     azure_openai_api_key: str
     azure_openai_endpoint: str
     azure_openai_api_version: str = "2024-12-01-preview"
-    azure_openai_deployment_main: str = "gpt-4o"
-    azure_openai_deployment_fast: str = "gpt-4.1-nano"
+    azure_openai_deployment_main: str = "gpt-4o-2"
+    azure_openai_deployment_fast: str = "gpt-4.1-nano-2"
     app_name: str = "SJ Project Planner Agent"
     log_level: str = "INFO"
     webhook_api_key: str = "change-me-in-production"

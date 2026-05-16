@@ -104,8 +104,8 @@ if ($APP_EXISTS) {
             "AZURE_OPENAI_API_KEY=secretref:aoai-key" `
             "AZURE_OPENAI_ENDPOINT=$($env:AZURE_OPENAI_ENDPOINT)" `
             "AZURE_OPENAI_API_VERSION=2024-12-01-preview" `
-            "AZURE_OPENAI_DEPLOYMENT_MAIN=gpt-4o" `
-            "AZURE_OPENAI_DEPLOYMENT_FAST=gpt-4.1-nano" `
+            "AZURE_OPENAI_DEPLOYMENT_MAIN=gpt-4o-2" `
+            "AZURE_OPENAI_DEPLOYMENT_FAST=gpt-4.1-nano-2" `
         --output none
 }
 
