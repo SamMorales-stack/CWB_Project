@@ -12,7 +12,7 @@
 
 ## Pitch Video
 
-🎬 **[YouTube URL — to be added]**
+🎬 **https://youtu.be/p_jZkgfvoZE**
 
 ---
 
