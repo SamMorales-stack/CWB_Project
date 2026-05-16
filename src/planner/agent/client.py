@@ -21,7 +21,7 @@ def get_client() -> AzureOpenAI:
         azure_endpoint=s.azure_openai_endpoint,
         api_version=s.azure_openai_api_version,
         max_retries=1,
-        timeout=60.0,
+        timeout=120.0,
     )
 
 
