@@ -36,3 +36,11 @@ jobs:
             --name sjplanner-sm2026 \
             --resource-group sjplanner-sm2026-rg \
             --image ${{ secrets.REGISTRY_LOGIN_SERVER }}/sjplanner:${{ github.sha }}
+          az containerapp update \
+            --name sjplanner-sm2026 \
+            --resource-group sjplanner-sm2026-rg \
+            --set-env-vars \
+              "AZURE_OPENAI_ENDPOINT=https://sbmorales1-1752-resource.cognitiveservices.azure.com/" \
+              "AZURE_OPENAI_API_VERSION=2024-12-01-preview" \
+              "AZURE_OPENAI_DEPLOYMENT_MAIN=gpt-4o-2" \
+              "AZURE_OPENAI_DEPLOYMENT_FAST=gpt-4.1-nano-2"
